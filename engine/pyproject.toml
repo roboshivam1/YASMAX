@@ -1,0 +1,43 @@
+# File: engine/pyproject.toml
+#
+# Package definition for the YASMAX simulation engine.
+#
+# The engine is a pure Python package with no runtime dependencies, so the
+# exact same code runs under CPython on your laptop (for pytest) and under
+# Pyodide in the browser. Keep it that way: never add a runtime dependency
+# here unless Pyodide ships it.
+#
+# Local dev:
+#   cd engine
+#   python3 -m pip install -e ".[dev]"
+#   pytest
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yasmax-engine"
+version = "0.1.0"
+description = "CPU simulation engine for YASMAX, a recreation of the YASMIN CPU Simulator for education."
+readme = "../README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[tool.setuptools.packages.find]
+include = ["yasmax_engine*"]
+
+[tool.pytest.ini_options]
+# Lets tests import yasmax_engine without installing the package first.
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]

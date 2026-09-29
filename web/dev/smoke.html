@@ -1,0 +1,105 @@
+<!--
+  File: web/dev/smoke.html
+
+  Developer smoke test for the engine plumbing. This is NOT the YASMAX
+  window; it's a bare page that proves every link in the chain works:
+
+    button -> bridge.js -> worker.js -> Pyodide -> yasmax_engine.api
+           <- reply JSON <- store.js -> this page redraws
+
+  How to run (from the repo root):
+    python3 tools/build_engine.py
+    python3 -m http.server 8000 --directory web
+    open http://localhost:8000/dev/smoke.html
+
+  It must be served over http://. Opening the file directly (file://) won't
+  work, because browsers block workers and fetch() there.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YASMAX Smoke Test</title>
+  <style>
+    body { font: 14px system-ui, sans-serif; margin: 16px; max-width: 900px; }
+    #status { padding: 8px; background: #fff7d6; border: 1px solid #e0c060; }
+    #status.ok { background: #e6f7e6; border-color: #60b060; }
+    #status.err { background: #fde8e8; border-color: #d06060; }
+    fieldset { margin: 12px 0; }
+    button, input, select { font: inherit; }
+    .cols { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+    table { border-collapse: collapse; font-family: ui-monospace, monospace; }
+    td, th { border: 1px solid #ccc; padding: 2px 8px; text-align: right; }
+    tr.read td { background: #dff0ff; }
+    tr.write td { background: #ffe3c4; }
+    tr.both td { background: #f1d9ff; }
+    pre { background: #f4f4f4; padding: 8px; max-height: 300px; overflow: auto; flex: 1; }
+  </style>
+</head>
+<body>
+  <h1>YASMAX engine smoke test</h1>
+  <div id="status">Starting…</div>
+
+  <fieldset id="controls" disabled>
+    <legend>Registers tab (engine commands)</legend>
+    <label>Register <input id="reg" value="R01" size="4"></label>
+    <label>Value <input id="val" value="42" size="8"></label>
+    <button id="change">CHANGE</button>
+    <button id="resetAll">RESET ALL</button>
+    <label>Set size <select id="size"></select></label>
+    <button id="bad">Send a bad command</button>
+  </fieldset>
+
+  <div class="cols">
+    <table><thead><tr><th>Reg</th><th>Val (D)</th></tr></thead><tbody id="gpr"></tbody></table>
+    <pre id="log"></pre>
+  </div>
+
+  <script type="module">
+    import { createEngine } from "../js/bridge.js";
+    import { createStore } from "../js/store.js";
+
+    const $ = (id) => document.getElementById(id);
+    const status = (text, cls = "") => { $("status").textContent = text; $("status").className = cls; };
+    const log = (label, data) => { $("log").textContent = `${label}: ${JSON.stringify(data, null, 1)}\n\n` + $("log").textContent; };
+
+    const engine = createEngine();
+    const store = createStore();
+
+    engine.on("boot", (m) => status(m.message));
+
+    // Redraw the register table whenever a new snapshot arrives.
+    store.subscribe((snap) => {
+      $("gpr").innerHTML = snap.gpr
+        .map((r) => `<tr class="${r.access ?? ""}"><td>${r.name}</td><td>${r.val}</td></tr>`)
+        .join("");
+      const sizes = snap.config.gpr_set_sizes;
+      $("size").innerHTML = sizes.map((s) => `<option ${s === snap.config.gpr_count ? "selected" : ""}>${s}</option>`).join("");
+    });
+
+    // Send a command, publish its snapshot, and log anything that went wrong.
+    async function send(cmd, args) {
+      const reply = store.applyReply(await engine.call(cmd, args));
+      if (!reply.ok) log(`${cmd} → not ok`, reply.events);
+      return reply;
+    }
+
+    $("change").onclick = () => send("set_register", { name: $("reg").value, value: $("val").value });
+    $("resetAll").onclick = () => send("reset_all_registers");
+    $("size").onchange = () => send("set_register_set_size", { size: $("size").value });
+    $("bad").onclick = () => send("launch_missiles");
+
+    try {
+      const t0 = performance.now();
+      const info = await engine.ready;
+      store.set(info.snapshot);
+      status(`Ready in ${((performance.now() - t0) / 1000).toFixed(1)} s. Pyodide ${info.pyodideVersion}, engine ${info.engineVersion}.`, "ok");
+      log("commands", info.commands);
+      $("controls").disabled = false;
+    } catch (err) {
+      status(`Boot failed: ${err.message}`, "err");
+    }
+  </script>
+</body>
+</html>

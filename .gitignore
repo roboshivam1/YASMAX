@@ -1,0 +1,19 @@
+# File: .gitignore
+# Things git should never track in the YASMAX repo.
+
+# Python caches and packaging leftovers
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Build output: regenerate with `python3 tools/build_engine.py`.
+# (CI will build it for deployment later.)
+web/engine.zip
+
+# Editor and OS clutter
+.DS_Store
+.vscode/
+.idea/
