@@ -1,6 +1,6 @@
 # YASMAX — Yet Another Simple Machine Architecture eXplorer
 
-**Open it: <https://roboshivam1.github.io/YASMAX/>**. Nothing to install, and it
+**Open it: <https://roboshivam1.github.io/YASMAX/> or <https://yasmax.shvmkpr.in>**. Nothing to install, and it
 works offline once installed as an app.
 
 YASMAX is a browser recreation of the **CPU Simulator** window of the
