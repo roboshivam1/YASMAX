@@ -9,9 +9,11 @@ __pycache__/
 .ruff_cache/
 .venv/
 
-# Build output: regenerate with `python3 tools/build_engine.py`.
-# (CI will build it for deployment later.)
+# Build output: regenerate with `python3 tools/build_engine.py`
+# and `python3 tools/build_site.py` (GitHub Actions builds them to deploy).
 web/engine.zip
+_site/
+dist/
 
 # Editor and OS clutter
 .DS_Store

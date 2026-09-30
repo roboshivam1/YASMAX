@@ -16,10 +16,12 @@
  * is going, only STOP is. SHOW PCB... belongs to the OS simulator.
  * TODO(R-15): confirm the original's enable rules.
  *
- * CPU Help tab: credit to the original and the YASMAX disclaimer (PRD F-51).
+ * CPU Help tab: credit to the original, the YASMAX disclaimer (PRD F-51),
+ * who made it, links to the guide and bug reports, and the build id.
  * CPU View tab: empty until captured from the original (UI_SPEC U-5).
  */
 
+import { BUILD } from "../build.js";
 import { button, radio, tabs } from "../ui/widgets.js";
 
 const SPEED_STEPS = 6; // tick marks on the original slider
@@ -44,11 +46,14 @@ function controlTab() {
 
 const HELP =
   '<div class="about">' +
-  "<p><b>YASMAX</b>: Yet Another Simple Machine Architecture eXplorer.</p>" +
-  "<p>An independent, non-commercial educational recreation of the CPU Simulator window of the " +
-  "<b>YASMIN CPU-OS Simulator</b> by <b>Besim Mustafa, Edge Hill University</b>, for students " +
-  "who cannot run the Windows-only original.</p>" +
-  "<p>Not affiliated with or endorsed by the original author. No commercial use.</p>" +
+  "<p><b>YASMAX</b>: Yet Another Simple Machine Architecture eXplorer. A non-commercial educational " +
+  "recreation of the <b>YASMIN CPU-OS Simulator</b> by <b>Besim Mustafa</b> (Edge Hill University). " +
+  "Not affiliated with or endorsed by him.</p>" +
+  '<p>Assembled with <span style="color:#d0243c">&hearts;</span> (and a lot of MOV instructions) by ' +
+  '<b>Shivam Kapoor</b> &middot; <a href="https://shvmkpr.in" target="_blank" rel="noopener">shvmkpr.in</a></p>' +
+  '<p><a href="https://github.com/roboshivam1/YASMAX/blob/main/docs/USER_GUIDE.md" target="_blank" rel="noopener">User guide</a> &middot; ' +
+  '<a href="https://github.com/roboshivam1/YASMAX/issues/new/choose" target="_blank" rel="noopener">Report a bug or a difference</a><br>' +
+  'Build <span id="build-id"></span></p>' +
   "</div>";
 
 /** Wire the vertical speed slider. Position 0 is Fast (top). */
@@ -96,6 +101,7 @@ export function mount(el, ctx) {
     });
   }
   wireSpeed(el.querySelector("#speed"), ui);
+  el.querySelector("#build-id").textContent = BUILD;
 
   const $ = (id) => el.querySelector(`#${id}`);
   $("btn-step").addEventListener("click", () => runner.step());

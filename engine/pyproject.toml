@@ -18,7 +18,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yasmax-engine"
-version = "0.5.1"
+version = "0.6.0"
 description = "CPU simulation engine for YASMAX, a recreation of the YASMIN CPU Simulator for education."
 readme = "../README.md"
 requires-python = ">=3.12"

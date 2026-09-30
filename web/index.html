@@ -29,6 +29,12 @@
   <link rel="stylesheet" href="css/dialogs.css">
   <link rel="stylesheet" href="css/windows.css">
   <link rel="stylesheet" href="css/execution.css">
+  <!-- Installable app (published builds; icons are drawn by tools/build_site.py) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2f63a8">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="YASMAX">
 </head>
 <body>
   <div id="stage">
@@ -52,8 +58,11 @@
       </div>
     </div>
     <div id="disclaimer">
-      YASMAX is an independent, non-commercial educational recreation, modelled on the YASMIN CPU-OS Simulator
-      by Besim Mustafa (Edge Hill University). Not affiliated with or endorsed by the original author. No commercial use.
+      Independent, non-commercial educational recreation of the YASMIN CPU-OS Simulator by Besim Mustafa
+      (Edge Hill University); not affiliated or endorsed. &middot;
+      <span class="credit">Assembled with <span class="heart">&hearts;</span> by Shivam Kapoor &middot;
+      <a href="https://shvmkpr.in" target="_blank" rel="noopener">shvmkpr.in</a></span>
+      <span id="update-note" hidden> &middot; A new version is ready: <a href="#" id="update-reload">reload</a></span>
     </div>
   </div>
 

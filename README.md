@@ -1,48 +1,86 @@
 # YASMAX — Yet Another Simple Machine Architecture eXplorer
 
-A browser-based, cross-platform recreation of the **CPU Simulator** window of the YASMIN CPU-OS Simulator, built so students on macOS and Linux can do their Computer Organization & Architecture lab work with a tool that looks and behaves like the one used in their labs.
+**Open it: <https://roboshivam1.github.io/YASMAX/>**. Nothing to install, and it
+works offline once installed as an app.
 
-The simulation engine is written in Python and runs locally in your browser through Pyodide (Python compiled to WebAssembly). There is no server, and after the first load it works offline.
+YASMAX is a browser recreation of the **CPU Simulator** window of the
+**YASMIN CPU-OS Simulator** (7.5.50, the version used in our labs), for students on
+**macOS, Linux and Chromebooks** who cannot run the Windows-only original. Same
+window, same instructions, same `.sas` program files, so you can practise at home
+and carry on in the lab.
+
+The simulator engine is written in Python and runs inside your browser through
+Pyodide (Python compiled to WebAssembly). Nothing is sent anywhere: there is no
+server, no account and no tracking.
+
+> **For practice, not a replacement.** YASMAX is checked against the lab version,
+> but some behaviour is still a best guess (listed below). If YASMIN and YASMAX ever
+> disagree, YASMIN is right. Please [report it](https://github.com/roboshivam1/YASMAX/issues/new/choose).
+
+## Get started
+
+| How | Steps | Offline? |
+|---|---|---|
+| **In the browser** | Open the link above. | after the first visit, yes |
+| **As an app** (recommended) | Chrome / Edge: the install icon in the address bar. Safari (macOS 14+): File > Add to Dock. | yes |
+| **Offline download** | Download `yasmax-offline-<version>.zip` from [Releases](https://github.com/roboshivam1/YASMAX/releases), unzip, run `start-mac.command` / `start-linux.sh` / `start-windows.bat`. Needs Python 3. | yes |
+
+New to the simulator? Read the **[User Guide](docs/USER_GUIDE.md)**. It has a five-minute first program.
 
 ## Credit and intended use
 
-YASMAX is an independent, non-commercial educational project. It is **inspired by and modelled on** the **YASMIN CPU-OS Simulator** by **Besim Mustafa, Edge Hill University**. All credit for the original design, instruction set and teaching approach goes to him.
+YASMAX is an independent, non-commercial educational project, **modelled on the
+YASMIN CPU-OS Simulator by Besim Mustafa, Edge Hill University** ([teach-sim.com](https://teach-sim.com/)).
+All credit for the original design, instruction set and teaching approach goes to him.
 
-- YASMAX is **not affiliated with or endorsed by** the original author or Edge Hill University.
-- It is for **educational use only**, mainly for students who cannot run the Windows-only original.
-- **No commercial use.** See `LICENSE` (to be decided; see `docs/PRD.md` §9).
+- **Not affiliated with or endorsed by** the original author or Edge Hill University.
+- **Educational use only. No commercial use.** YASMAX's own code is under the
+  [PolyForm Noncommercial License 1.0.0](LICENSE).
 - If you can run the original YASMIN, use it. YASMAX exists for everyone who can't.
 
-## Scope
+Assembled with ♥ by **Shivam Kapoor** · [shvmkpr.in](https://shvmkpr.in)
 
-v1 recreates the **CPU Simulator window only**. The OS simulator, compiler, virtual OS, interrupts and I/O windows are out of scope. Their buttons are still drawn so the layout matches, and they show a "not available in YASMAX" notice when clicked.
+## What is included
 
-## Docs
+The complete CPU Simulator window: instruction memory view (PC arrow, breakpoints,
+labels), program list, special and general registers, program stack, the instruction
+dialog with every documented instruction, STEP / RUN / STOP / RESET PROGRAM, by-tick
+stepping and the Execution Unit tab, program data memory, the console, and SAVE /
+LOAD of YASMIN `.sas` files.
+
+**Not included:** the OS simulator, compiler, virtual OS, interrupts, pipeline and
+cache windows. Their buttons are drawn so the layout matches, and they say so when clicked.
+
+**Tested on:** Chromium-based browsers (Chrome, Edge, Brave). Safari and Firefox
+should work, but have not been tested yet.
+
+## Run it from the source (developers)
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate && pip install pytest ruff
+python3 tools/build_engine.py        # build the engine (and self-test it)
+python3 tools/serve.py               # http://localhost:8000, caching off
+(cd engine && pytest -q)             # engine tests
+python3 tools/build_site.py --zip    # the publishable site (_site/) + offline zip (dist/)
+```
+
+Use `tools/serve.py`, not `python3 -m http.server`: it switches browser caching off,
+so a normal reload always runs the files on disk. Offline mode (the service worker)
+only switches on in published builds, so development never runs stale files.
 
 | Doc | What it covers |
 |---|---|
-| [`docs/PRD.md`](docs/PRD.md) | Problem, users, requirements, non-goals, milestones |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Modules, how the engine, worker and UI connect, state model |
+| [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) | For students: install, first program, every panel, troubleshooting |
+| [`docs/LAUNCH_GUIDE.md`](docs/LAUNCH_GUIDE.md) | For the maintainer: publishing on GitHub Pages, releases, updates |
+| [`CHANGELOG.md`](CHANGELOG.md) | What changed in each version |
+| [`docs/PRD.md`](docs/PRD.md) | Problem, users, requirements, non-goals |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the engine, worker and UI connect |
 | [`docs/TECH_STACK.md`](docs/TECH_STACK.md) | Chosen tools and why |
-| [`docs/APP_FLOW.md`](docs/APP_FLOW.md) | What the user does, screen by screen, and what the system does in response |
+| [`docs/APP_FLOW.md`](docs/APP_FLOW.md) | What the user does, and what the system does in response |
 | [`docs/UI_SPEC.md`](docs/UI_SPEC.md) | Panel-by-panel inventory of the original window |
-| [`docs/RESEARCH.md`](docs/RESEARCH.md) | Behaviour of the original we must verify before implementing |
+| [`docs/RESEARCH.md`](docs/RESEARCH.md) | What is verified against YASMIN, what is still a guess, lab checklist |
 
-## Running locally
-
-From the repo root:
-
-```bash
-python3 tools/build_engine.py
-python3 tools/serve.py
-```
-
-Then open http://localhost:8000. Use `tools/serve.py`, not `python3 -m http.server`:
-it switches browser caching off, so after you paste new code a normal reload
-always runs the new files. (A cached old `worker.js` once left the instruction
-dialog empty.) If something still looks stale, reload with Shift + Reload.
-
-## Guesses to check in the lab
+## Known differences and guesses
 
 YASMAX follows the original wherever it is known: the ISA document, the lab
 tutorials, lab screenshots of YASMIN 7.5.50 and a saved `.sas` file. Where

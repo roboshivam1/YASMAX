@@ -1,0 +1,51 @@
+# File: .github/workflows/deploy.yml
+#
+# Publishes YASMAX to GitHub Pages on every push to main (or master):
+# test the engine, build _site/ with tools/build_site.py, deploy it.
+# Needs: repo Settings > Pages > Source = "GitHub Actions" (one time).
+# See docs/LAUNCH_GUIDE.md.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test the engine
+        run: |
+          pip install pytest
+          cd engine && pytest -q
+      - name: Build the site
+        run: python3 tools/build_site.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

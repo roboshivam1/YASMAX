@@ -23,6 +23,7 @@
  * window.yasmax exposes send/store/engine for testing in the browser console.
  */
 
+import { BUILD } from "./build.js";
 import { createEngine } from "./bridge.js";
 import { createRunner } from "./runner.js";
 import { consoleWrite } from "./windows/console.js";
@@ -118,4 +119,19 @@ try {
 } catch (err) {
   overlay.classList.add("error");
   overlay.firstElementChild.textContent = `YASMAX could not start: ${err.message}`;
+}
+
+// Offline mode and "Install app": only for published builds (tools/build_site.py
+// stamps BUILD), so local development never runs stale cached files.
+if (BUILD !== "dev" && "serviceWorker" in navigator) {
+  const hadWorker = Boolean(navigator.serviceWorker.controller);
+  navigator.serviceWorker.register("sw.js").catch((err) => console.warn("Offline mode unavailable:", err));
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadWorker) return; // first install: nothing to update
+    document.getElementById("update-note").hidden = false;
+  });
+  document.getElementById("update-reload").addEventListener("click", (e) => {
+    e.preventDefault();
+    location.reload();
+  });
 }

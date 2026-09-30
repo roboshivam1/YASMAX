@@ -6,7 +6,9 @@
  *
  * Boot sequence
  * -------------
- *   1. Load the Pyodide runtime (Python compiled to WebAssembly) from the CDN.
+ *   1. Load the Pyodide runtime (Python compiled to WebAssembly): the copy
+ *      in ../pyodide/ when the site was built with tools/build_site.py
+ *      (published site, offline download), otherwise the jsDelivr CDN.
  *   2. Download web/engine.zip (built by tools/build_engine.py).
  *   3. Unpack it into Pyodide's in-memory filesystem at /engine.
  *   4. Put /engine on sys.path and import yasmax_engine.api.
@@ -33,7 +35,19 @@
 // One place to change the Pyodide version. Keep it pinned: an unpinned
 // "latest" could change Python behaviour under students mid-semester.
 const PYODIDE_VERSION = "314.0.7";
-const PYODIDE_BASE = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
+const PYODIDE_CDN = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
+const PYODIDE_LOCAL = new URL("../pyodide/", import.meta.url).href;
+
+async function pyodideBase() {
+  try {
+    // A plain GET (not HEAD), so the offline cache in sw.js can answer it.
+    const r = await fetch(`${PYODIDE_LOCAL}pyodide.mjs`);
+    if (r.ok) return PYODIDE_LOCAL;
+  } catch {
+    // no local copy: fall through to the CDN
+  }
+  return PYODIDE_CDN;
+}
 
 // Messages that arrive while booting simply wait on `ready` (see onmessage
 // below), so the handler is registered immediately and nothing is lost.
@@ -45,8 +59,9 @@ function post(message) {
 
 async function boot() {
   post({ type: "boot", stage: "runtime", message: "Loading Python runtime…" });
-  const { loadPyodide } = await import(`${PYODIDE_BASE}pyodide.mjs`);
-  const pyodide = await loadPyodide({ indexURL: PYODIDE_BASE });
+  const base = await pyodideBase();
+  const { loadPyodide } = await import(`${base}pyodide.mjs`);
+  const pyodide = await loadPyodide({ indexURL: base });
 
   post({ type: "boot", stage: "engine", message: "Loading YASMAX engine…" });
   // "no-cache" means the browser revalidates, so a rebuilt engine.zip is

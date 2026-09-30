@@ -93,3 +93,10 @@
 .w-float select.lbl-pick { padding: 0; color: transparent; }
 .w-float select.lbl-pick option { color: #000; }
 .w-float select.lbl-pick[hidden] { display: none; }
+
+/* ---------- footer credit and update notice ---------- */
+#disclaimer a { color: #1c4f96; }
+#disclaimer .credit { white-space: nowrap; }
+#disclaimer .heart { color: #d0243c; }
+#p-control .about { font-size: 12.5px; line-height: 1.4; }
+#p-control .about a { color: #1c4f96; }

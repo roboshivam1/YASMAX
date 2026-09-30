@@ -1,0 +1,33 @@
+# File: .github/workflows/release.yml
+#
+# Builds the offline download and attaches it to a GitHub Release when you
+# push a version tag, e.g.:  git tag v0.6.0 && git push origin v0.6.0
+# See docs/LAUNCH_GUIDE.md, "Releasing the offline download".
+
+name: Release offline download
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test the engine
+        run: |
+          pip install pytest
+          cd engine && pytest -q
+      - name: Build the site and the offline zip
+        run: python3 tools/build_site.py --zip
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true

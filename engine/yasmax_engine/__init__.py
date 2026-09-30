@@ -11,7 +11,7 @@ The browser does not use these names directly: the worker talks only to
 `yasmax_engine.api` (boot / dispatch), which wraps a Machine in JSON.
 """
 
-__version__ = "0.5.1"
+__version__ = "0.6.0"
 
 from .config import DEFAULT_CONFIG, MachineConfig  # noqa: E402
 from .errors import FaultCode, MachineFault, ProgramError, YasmaxError  # noqa: E402
