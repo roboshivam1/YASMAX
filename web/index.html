@@ -1,0 +1,63 @@
+<!--
+  File: web/index.html
+
+  The YASMAX main page: one fixed-size replica of the YASMIN
+  "CPU Simulator" window. This file holds only the frame and the empty
+  regions. Each region is filled by its panel module in js/panels/,
+  mounted by js/main.js.
+
+  Region ids match docs/UI_SPEC.md §2:
+    A p-memory   B p-cache    C p-proglist   D p-special   E p-stack
+    G p-gpr      H p-progtabs I p-control    J p-advanced  K p-regtabs
+
+  Run from the repo root:
+    python3 tools/build_engine.py
+    python3 -m http.server 8000 --directory web
+    open http://localhost:8000
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YASMAX - CPU Simulator</title>
+  <meta name="description" content="Educational browser recreation of the YASMIN CPU Simulator for macOS and Linux students.">
+  <link rel="stylesheet" href="css/win7.css">
+  <link rel="stylesheet" href="css/win7-lists.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/layout-bottom.css">
+  <link rel="stylesheet" href="css/dialogs.css">
+  <link rel="stylesheet" href="css/windows.css">
+</head>
+<body>
+  <div id="stage">
+    <div id="window" class="w-window">
+      <div class="w-titlebar">
+        <span class="w-title-icon"></span>
+        <span>CPU Simulator: CPU 0&nbsp;&nbsp;&nbsp;&nbsp;[YASMAX: educational recreation of the YASMIN CPU-OS Simulator by Besim Mustafa, Edge Hill University]</span>
+        <div class="w-caption-btns"><span>&ndash;</span><span>&#9633;</span><span class="close">x</span></div>
+      </div>
+      <div id="client" class="w-client">
+        <section id="p-memory" class="region"></section>
+        <section id="p-cache" class="region"></section>
+        <section id="p-proglist" class="region"></section>
+        <section id="p-special" class="region"></section>
+        <section id="p-stack" class="region"></section>
+        <section id="p-gpr" class="region"></section>
+        <section id="p-progtabs" class="region"></section>
+        <section id="p-control" class="region"></section>
+        <section id="p-advanced" class="region"></section>
+        <section id="p-regtabs" class="region"></section>
+      </div>
+    </div>
+    <div id="disclaimer">
+      YASMAX is an independent, non-commercial educational recreation, modelled on the YASMIN CPU-OS Simulator
+      by Besim Mustafa (Edge Hill University). Not affiliated with or endorsed by the original author. No commercial use.
+    </div>
+  </div>
+
+  <div id="boot-overlay"><div class="box">Starting YASMAX&hellip;</div></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

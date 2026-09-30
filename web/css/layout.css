@@ -1,0 +1,117 @@
+/*
+ * File: web/css/layout.css
+ *
+ * WHERE everything sits in the upper half of the window. Pixel values were
+ * measured from a screenshot of YASMIN v7.2.27 (1 screenshot px = 1 CSS px).
+ * The bottom tab panels are in css/layout-bottom.css.
+ *
+ * Filling the browser: js/ui/scale.js zooms the page uniformly and sets
+ *   --ex  extra width for EACH of the 4 columns
+ *   --ey  extra height for the upper panels
+ * Every rule below adds them with calc() where the original form would
+ * stretch: list boxes grow, whole columns shift right by the extra width of
+ * the columns before them, and the bottom row moves down by --ey.
+ *
+ * Coordinates: regions are relative to the client area (below the title
+ * bar); everything inside a region is relative to that region.
+ */
+
+html, body { margin: 0; height: 100%; }
+body { background: #dfe6ee; overflow: hidden; }
+
+#stage { position: fixed; left: 0; top: 0; --ex: 0px; --ey: 0px; }
+#window { position: absolute; left: 0; top: 0; width: calc(1482px + 4 * var(--ex)); height: calc(966px + var(--ey)); }
+#client { left: 10px; top: 39px; width: calc(1460px + 4 * var(--ex)); height: calc(912px + var(--ey)); }
+.region { position: absolute; }
+
+#disclaimer {
+  position: absolute;
+  left: 0; top: calc(972px + var(--ey)); width: calc(1482px + 4 * var(--ex));
+  font: 12px var(--font-ui);
+  color: #3a4a5c;
+  text-align: center;
+}
+
+/* ---------- regions (column n shifts right by n * --ex) ---------- */
+#p-memory    { left: 0;                          top: 0;     width: calc(428px + var(--ex)); height: calc(668px + var(--ey)); }
+#p-cache     { left: calc(430px + var(--ex));     top: 10px;  width: calc(336px + var(--ex)); height: 298px; }
+#p-proglist  { left: calc(427px + var(--ex));     top: 313px; width: calc(345px + var(--ex)); height: calc(352px + var(--ey)); }
+#p-special   { left: calc(775px + 2 * var(--ex)); top: 0;     width: calc(312px + var(--ex)); height: 310px; }
+#p-stack     { left: calc(775px + 2 * var(--ex)); top: 313px; width: calc(312px + var(--ex)); height: calc(352px + var(--ey)); }
+#p-gpr       { left: calc(1093px + 3 * var(--ex)); top: 0;    width: calc(365px + var(--ex)); height: calc(668px + var(--ey)); }
+
+/* ---------- A: CPU instructions in memory ---------- */
+#p-memory .w-group { left: 4px; top: 9px; width: calc(421px + var(--ex)); height: calc(654px + var(--ey)); }
+#mem-list { left: 10px; top: 20px; width: calc(412px + var(--ex)); height: calc(641px + var(--ey)); }
+#mem-list th { height: 29px; font: bold 20px var(--font-serif); }
+#mem-list td, #prog-list td { font: 16px var(--font-serif); }
+
+/* ---------- B: Cache - Pipeline / Execution Unit ---------- */
+#p-cache .w-tabs { inset: 0; }
+#p-cache .grp-pipeline { left: 30px; top: 31px; width: 278px; height: 97px; }
+#p-cache .grp-cache { left: 30px; top: 154px; width: 278px; height: 74px; }
+#p-cache .w-legend { font-size: 14px; background: #f3f3f3; }
+#pipe-single { left: 10px; top: 13px; }
+#pipe-dual { left: 146px; top: 13px; }
+#p-cache .lbl-select-pipeline { left: 10px; top: 35px; font-size: 14px; }
+#pipe-select { left: 15px; top: 58px; width: 85px; height: 26px; }
+#btn-show-pipeline { left: 161px; top: 42px; width: 101px; height: 46px; }
+#p-cache .lbl-cache-type { left: 10px; top: 10px; font-size: 14px; }
+#cache-type { left: 14px; top: 36px; width: 91px; height: 25px; }
+#btn-show-cache { left: 161px; top: 21px; width: 101px; height: 45px; }
+
+/* ---------- C: program list (buttons stay at the bottom, split the width) ---------- */
+#p-proglist .w-group { left: 0; top: 13px; width: calc(338px + var(--ex)); height: calc(337px + var(--ey)); }
+#prog-list { left: 7px; top: 27px; width: calc(326px + var(--ex)); height: calc(158px + var(--ey)); }
+#prog-list th { height: 22px; }
+#p-proglist .w-btn { width: calc(158px + var(--ex) / 2); height: 45px; }
+#btn-load-compiled, #btn-remove-program, #btn-create-instance { left: 10px; }
+#btn-show-data-mem, #btn-remove-all, #btn-delete-instance { left: calc(175px + var(--ex) / 2); }
+#btn-load-compiled, #btn-show-data-mem { top: calc(195px + var(--ey)); }
+#btn-remove-program, #btn-remove-all { top: calc(249px + var(--ey)); }
+#btn-create-instance, #btn-delete-instance { top: calc(303px + var(--ey)); }
+
+/* ---------- D: special CPU registers ---------- */
+#p-special .w-group { left: 1px; top: 12px; width: calc(308px + var(--ex)); height: 296px; }
+#p-special .w-label.bold { font-size: 14px; }
+#p-special .w-value { height: 34px; }
+#lbl-pc { left: 10px; top: 39px; }   #reg-pc { left: 50px; top: 37px; width: 84px; }
+#lbl-sp { left: 10px; top: 73px; }   #reg-sp { left: 50px; top: 75px; width: 84px; }
+#lbl-sr { left: 163px; top: 38px; }  #reg-sr { left: 210px; top: 37px; width: 84px; }
+#lbl-br { left: 163px; top: 69px; }  #reg-br { left: 210px; top: 75px; width: 84px; }
+#lbl-flags { left: 20px; top: 119px; }
+#p-special .flags-box { left: 21px; top: 145px; width: 263px; height: 32px; }
+#lbl-ov { left: 30px; top: 152px; }  #flag-ov { position: absolute; left: 69px; top: 153px; }
+#lbl-z  { left: 135px; top: 152px; } #flag-z  { position: absolute; left: 161px; top: 153px; }
+#lbl-n  { left: 225px; top: 152px; } #flag-n  { position: absolute; left: 253px; top: 153px; }
+#lbl-ir  { left: 52px; top: 196px; } #reg-ir  { left: 107px; top: 195px; width: 151px; height: 32px; }
+#lbl-mar { left: 52px; top: 232px; } #reg-mar { left: 107px; top: 230px; width: 82px; height: 33px; }
+#lbl-mdr { left: 52px; top: 270px; } #reg-mdr { left: 107px; top: 267px; width: 151px; height: 31px; }
+
+/* ---------- E: program stack ---------- */
+#p-stack .w-group { left: 0; top: 13px; width: calc(310px + var(--ex)); height: calc(337px + var(--ey)); }
+#stack-list { left: 3px; top: 25px; width: calc(300px + var(--ex)); height: calc(325px + var(--ey)); }
+
+/* ---------- G: general purpose registers ---------- */
+#p-gpr .w-group { left: 2px; top: 11px; width: calc(360px + var(--ex)); height: calc(652px + var(--ey)); }
+#gpr-list { left: 7px; top: 28px; width: calc(347px + var(--ex)); height: calc(635px + var(--ey)); overflow-x: hidden; }
+#gpr-list td { height: 22.5px; font: bold 17px var(--font-mono); border-bottom: 1px solid #ececec; }
+#gpr-list td:first-child { padding-left: 4px; }
+#gpr-list .reg-name { margin-left: 25px; vertical-align: 1px; }
+#gpr-list input { width: 16px; height: 16px; vertical-align: -3px; }
+#gpr-list tr.selected td { background: #cde8ff; }
+/* "Show Reg Access Status". TODO(R-13): confirm the original's colours. */
+#gpr-list.show-access tr.access-read td { background: #c6efce; }
+#gpr-list.show-access tr.access-write td { background: #ffc7ce; }
+#gpr-list.show-access tr.access-both td { background: #ffeb9c; }
+
+/* ---------- boot overlay ---------- */
+#boot-overlay {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(223, 230, 238, 0.75);
+  font: 15px var(--font-ui);
+}
+#boot-overlay .box { background: #fff; border: 1px solid #8ba2bf; padding: 16px 24px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2); }
+#boot-overlay.error .box { border-color: #c44; }
+#boot-overlay[hidden] { display: none; }

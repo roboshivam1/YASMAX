@@ -1,0 +1,137 @@
+/*
+ * File: web/css/win7-lists.css
+ *
+ * Second half of the Windows 7 look (first half: css/win7.css):
+ * list views, read-only value boxes, text inputs, checkboxes, radios,
+ * dropdowns and the classic always-visible scrollbars.
+ *
+ * Split into two files only to keep each one short enough to paste.
+ */
+
+/* ---------- list view ---------- */
+.w-list {
+  position: absolute;
+  border: 1px solid var(--edge);
+  overflow: auto;
+  background: #fff;
+}
+.w-list table { border-collapse: collapse; table-layout: fixed; width: max-content; min-width: 100%; }
+.w-list th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 24px;
+  padding: 0 6px;
+  text-align: left;
+  font: bold 16px var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  background: linear-gradient(#fff, #fff 45%, #f3f4f6 46%, #eceef1);
+  border-right: 1px solid #d5d5d5;
+  border-bottom: 1px solid #d5d5d5;
+}
+.w-list td {
+  height: 23px;
+  padding: 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+}
+.w-list tr.filler.last td { height: auto; border-bottom: 0; }
+.w-list .r { text-align: right; }
+.w-list.cyan { background: var(--cyan); }
+.w-list.yellow { background: var(--yellow); }
+.w-list.pale-yellow { background: var(--pale-yellow); }
+.w-list.grey { background: var(--reg-grey); }
+.w-list tbody tr.selected td { background: #3399ff; color: #fff; }
+
+/* ---------- read-only value box (PC, SP, IR ...) ---------- */
+.w-value {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid #e2e3ea;
+  border-top-color: #abadb3;
+  padding: 0 6px;
+  font: bold 20px var(--font-serif);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.w-value.cyan { background: var(--cyan); }
+.w-value.yellow { background: var(--yellow); }
+.w-value.peach { background: var(--peach); }
+
+/* ---------- inputs ---------- */
+.w-text {
+  position: absolute;
+  box-sizing: border-box;
+  height: 22px;
+  border: 1px solid #abadb3;
+  border-color: #abadb3 #e2e3ea #e3e9ef #e2e3ea;
+  font: 13px var(--font-ui);
+  padding: 0 3px;
+}
+.w-select {
+  position: absolute;
+  box-sizing: border-box;
+  height: 24px;
+  font: 15px var(--font-ui);
+  color: #000;
+  padding: 0 22px 0 5px;
+  border: 1px solid #707070;
+  border-radius: 3px;
+  appearance: none;
+  -webkit-appearance: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0h9L4.5 5z'/%3E%3C/svg%3E") right 7px center no-repeat,
+    linear-gradient(#f2f2f2, #ebebeb 50%, #dddddd 51%, #cfcfcf);
+}
+.w-check, .w-radio { position: absolute; white-space: nowrap; font: 14px var(--font-ui); }
+.w-radio.disabled { color: var(--ink-disabled); }
+.w-client input[type="checkbox"], .w-client input[type="radio"] { margin: 0; vertical-align: -2px; accent-color: #2f6eb8; }
+.w-client input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #8e8f8f;
+  background: linear-gradient(135deg, #dcdcdc, #fbfbfb);
+  box-shadow: inset 0 0 0 1px #f4f4f4;
+}
+.w-client input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0;
+  width: 4px;
+  height: 8px;
+  border: solid #20407a;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ---------- labels ---------- */
+.w-label { position: absolute; white-space: nowrap; }
+.w-label.bold { font: bold 14px var(--font-section); letter-spacing: 0.3px; }
+
+/* ---------- classic scrollbars (Chrome, Edge, Safari) ---------- */
+.w-client ::-webkit-scrollbar { width: 17px; height: 17px; background: #f0f0f0; }
+.w-client ::-webkit-scrollbar-track { background: linear-gradient(90deg, #e6e6e6, #f4f4f4 30%, #f4f4f4 70%, #e6e6e6); }
+.w-client ::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #f3f3f3, #e2e2e2 50%, #d4d4d4 51%, #dcdcdc);
+  border: 1px solid #9c9c9c;
+  border-radius: 2px;
+}
+.w-client ::-webkit-scrollbar-thumb:horizontal { background: linear-gradient(#f3f3f3, #e2e2e2 50%, #d4d4d4 51%, #dcdcdc); }
+.w-client ::-webkit-scrollbar-button:single-button { display: block; width: 17px; height: 17px; background: #f0f0f0 center no-repeat; }
+.w-client ::-webkit-scrollbar-corner { background: #f0f0f0; }
+/* Firefox has no pseudo-elements for this; the closest is colouring its scrollbars. */
+@supports not selector(::-webkit-scrollbar) {
+  .w-list { scrollbar-color: #cdcdcd #f0f0f0; }
+}

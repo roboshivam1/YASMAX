@@ -1,0 +1,94 @@
+/*
+ * File: web/js/main.js
+ *
+ * Boots the YASMAX page:
+ *   1. Make the window fill the browser (js/ui/scale.js).
+ *   2. Mount every panel into its region, so the window is visible at
+ *      once, before Python has loaded.
+ *   3. Start the engine worker, show boot progress in the overlay, and
+ *      publish the first snapshot, which makes the panels fill in.
+ *
+ * Every panel gets the same `ctx` object:
+ *   store        latest snapshot + subscribe()        (js/store.js)
+ *   engine       call(cmd, args) to the worker        (js/bridge.js)
+ *   send         call + publish snapshot + show any error dialog
+ *   ui           UI-only settings (step mode, run speed) shared by panels
+ *   notAvailable notice for YASMIN parts YASMAX won't recreate
+ *   notYet       notice for YASMAX features not built yet
+ *   isa          the instruction set table sent by the engine at boot
+ *
+ * window.yasmax exposes send/store/engine for testing in the browser console.
+ */
+
+import { createEngine } from "./bridge.js";
+import { createStore } from "./store.js";
+import { refillAll } from "./ui/lists.js";
+import { messageBox, notAvailable, notYet } from "./ui/messageBox.js";
+import { fitToScreen } from "./ui/scale.js";
+import { wireTabs } from "./ui/widgets.js";
+import * as advanced from "./panels/advanced.js";
+import * as cachePipeline from "./panels/cachePipeline.js";
+import * as gpRegs from "./panels/gpRegs.js";
+import * as memoryView from "./panels/memoryView.js";
+import * as programControl from "./panels/programControl.js";
+import * as programList from "./panels/programList.js";
+import * as programTabs from "./panels/programTabs.js";
+import * as regTabs from "./panels/regTabs.js";
+import * as specialRegs from "./panels/specialRegs.js";
+import * as stackView from "./panels/stackView.js";
+
+// region id -> panel module (region letters: docs/UI_SPEC.md §2)
+const PANELS = {
+  "p-memory": memoryView,
+  "p-cache": cachePipeline,
+  "p-proglist": programList,
+  "p-special": specialRegs,
+  "p-stack": stackView,
+  "p-gpr": gpRegs,
+  "p-progtabs": programTabs,
+  "p-control": programControl,
+  "p-advanced": advanced,
+  "p-regtabs": regTabs,
+};
+
+const store = createStore();
+const engine = createEngine();
+
+/** Send a command, publish the new state, and show a dialog if it failed. */
+async function send(cmd, args) {
+  const reply = store.applyReply(await engine.call(cmd, args));
+  if (!reply.ok) {
+    const event = reply.events[0] ?? { message: "Unknown error" };
+    await messageBox("CPU Simulator", event.message, { icon: "error" });
+  }
+  return reply;
+}
+
+const ui = { stepMode: "instruction", speed: 1 };
+const ctx = { store, engine, send, ui, notAvailable, notYet, isa: [] };
+
+// Developer handle for the browser console, e.g.
+//   await yasmax.send("add_instruction", { program: "P1", text: "MOV #5, R00" })
+window.yasmax = { send, store, engine };
+
+fitToScreen(document.getElementById("stage"), { onResize: refillAll });
+for (const [id, panel] of Object.entries(PANELS)) {
+  panel.mount(document.getElementById(id), ctx);
+}
+wireTabs(document.getElementById("client"));
+
+const overlay = document.getElementById("boot-overlay");
+engine.on("boot", (m) => {
+  overlay.firstElementChild.textContent = m.message;
+});
+
+try {
+  const info = await engine.ready;
+  ctx.isa = info.isa;
+  store.set(info.snapshot);
+  overlay.hidden = true;
+  console.info(`YASMAX ready: engine ${info.engineVersion}, Pyodide ${info.pyodideVersion}`);
+} catch (err) {
+  overlay.classList.add("error");
+  overlay.firstElementChild.textContent = `YASMAX could not start: ${err.message}`;
+}

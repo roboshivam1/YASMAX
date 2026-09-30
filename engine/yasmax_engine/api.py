@@ -16,6 +16,7 @@ that you would have to remember to destroy.
 Reply shape (every command)
 ---------------------------
     {"ok": true|false, "snapshot": {...}, "events": [ {...}, ... ]}
+plus "result": ... when the command returns a value (e.g. data_memory).
 
 - ok=false with a "program_error" or "fault" event is NORMAL. It means
   the student did something invalid, and the UI shows a dialog.
@@ -36,6 +37,7 @@ from typing import Any
 
 from . import __version__
 from .errors import YasmaxError
+from .isa import UI_NAMES, isa_table
 from .machine import Machine
 
 # Command name (sent by the UI) -> Machine method name.
@@ -45,6 +47,18 @@ COMMANDS: dict[str, str] = {
     "set_register": "set_register",
     "reset_all_registers": "reset_all_registers",
     "set_register_set_size": "set_register_set_size",
+    "create_program": "create_program",
+    "remove_program": "remove_program",
+    "remove_all_programs": "remove_all_programs",
+    "add_instruction": "add_instruction",
+    "insert_instruction": "insert_instruction",
+    "edit_instruction": "edit_instruction",
+    "delete_instruction": "delete_instruction",
+    "move_instruction": "move_instruction",
+    "data_memory": "data_memory",
+    "write_data": "write_data",
+    "write_data_bytes": "write_data_bytes",
+    "reset_data_memory": "reset_data_memory",
 }
 
 _machine: Machine | None = None
@@ -57,8 +71,11 @@ def _get_machine() -> Machine:
     return _machine
 
 
-def _reply(ok: bool, events: list[dict[str, Any]]) -> str:
-    return json.dumps({"ok": ok, "snapshot": _get_machine().snapshot(), "events": events})
+def _reply(ok: bool, events: list[dict[str, Any]], result: Any = None) -> str:
+    reply = {"ok": ok, "snapshot": _get_machine().snapshot(), "events": events}
+    if result is not None:
+        reply["result"] = result
+    return json.dumps(reply)
 
 
 def boot() -> str:
@@ -70,6 +87,9 @@ def boot() -> str:
             "engine_version": __version__,
             "commands": sorted(COMMANDS),
             "snapshot": _machine.snapshot(),
+            # For the instruction dialog: every opcode and the mode labels.
+            "isa": isa_table(),
+            "address_modes": {int(m): name for m, name in UI_NAMES.items()},
         }
     )
 
@@ -98,7 +118,7 @@ def dispatch(cmd: str, args_json: str = "{}") -> str:
         return _reply(False, [{"type": "bad_request", "message": f"{cmd}: {exc}"}])
 
     try:
-        method(**args)
+        result = method(**args)
     except YasmaxError as exc:
         return _reply(False, [exc.to_event()])
     except Exception as exc:  # noqa: BLE001 - last line of defence, see module docstring
@@ -106,4 +126,5 @@ def dispatch(cmd: str, args_json: str = "{}") -> str:
             False,
             [{"type": "internal_error", "message": repr(exc), "trace": traceback.format_exc()}],
         )
-    return _reply(True, [])
+    # "snapshot" already IS the snapshot; don't send it twice.
+    return _reply(True, [], None if cmd == "snapshot" else result)

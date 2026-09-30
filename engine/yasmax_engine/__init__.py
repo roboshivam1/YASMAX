@@ -11,12 +11,13 @@ The browser does not use these names directly: the worker talks only to
 `yasmax_engine.api` (boot / dispatch), which wraps a Machine in JSON.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.4.0"
 
 from .config import DEFAULT_CONFIG, MachineConfig  # noqa: E402
 from .errors import FaultCode, MachineFault, ProgramError, YasmaxError  # noqa: E402
 from .flags import FlagResult, StatusFlags, evaluate  # noqa: E402
 from .machine import Machine, RunState  # noqa: E402
+from .program import Program, ProgramList  # noqa: E402
 from .registers import Access, RegisterFile, SpecialRegisters, reg_name  # noqa: E402
 
 __all__ = [
@@ -27,6 +28,8 @@ __all__ = [
     "Machine",
     "MachineConfig",
     "MachineFault",
+    "Program",
+    "ProgramList",
     "ProgramError",
     "RunState",
     "RegisterFile",

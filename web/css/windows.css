@@ -1,0 +1,112 @@
+/*
+ * File: web/css/windows.css
+ *
+ * Floating tool windows (js/ui/window.js) and the controls that only
+ * appear inside them. Same Win7 look as the main window: glass frame,
+ * title bar, red close button, grey client area.
+ */
+
+.w-float {
+  position: absolute;
+  background: linear-gradient(180deg, #b9d1ea 0, #8fb2d8 30px, #7ea5cf);
+  border: 1px solid #0b1520;
+  border-radius: 6px 6px 3px 3px;
+  padding: 0 7px 7px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  font: 13px var(--font-ui);
+}
+.w-float-title {
+  position: relative;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: default;
+  user-select: none;
+  touch-action: none;
+  text-shadow: 0 0 6px #fff, 0 0 3px #fff;
+  font: 14px var(--font-ui);
+}
+.w-float-icon {
+  width: 14px;
+  height: 12px;
+  background: linear-gradient(160deg, #fff, #7b8ea8);
+  border: 1px solid #455b77;
+  border-radius: 2px;
+}
+.w-float-x {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 42px;
+  height: 18px;
+  line-height: 16px;
+  text-align: center;
+  color: #fff;
+  font: bold 12px Arial, sans-serif;
+  text-shadow: 0 0 2px #000;
+  border: 1px solid #6d2a1c;
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(#eab0a4, #d6705d 50%, #c2412a 51%, #dd8b6f);
+}
+.w-float-client {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #8ba2bf;
+}
+
+/* ---------- controls used inside tool windows ---------- */
+
+/* Win7 list box (the yellow Op Code list). */
+.w-listbox {
+  position: absolute;
+  margin: 0;
+  padding: 1px 0;
+  list-style: none;
+  overflow-y: auto;
+  border: 1px solid #828790;
+  background: var(--yellow);
+  font: bold 16px var(--font-mono);
+}
+.w-listbox li { padding: 0 3px; line-height: 19px; cursor: default; }
+.w-listbox li.selected { background: #3399ff; color: #fff; }
+
+/* A frame without a caption (the addressing-mode boxes). */
+.w-frame {
+  position: absolute;
+  border: 1px solid #a0a0a0;
+  box-shadow: 1px 1px 0 #fff, inset 1px 1px 0 #fff;
+}
+
+/* Two-row tab strip (instruction groups). */
+.w-tabrow { position: absolute; display: flex; }
+.w-tabrow .w-tab { font: bold 14px var(--font-ui); text-align: center; line-height: 21px; }
+.w-tabrow .w-tab.active { line-height: 21px; }
+
+/* Light-yellow description strip, blue bold text. */
+.w-strip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #a0a0a0;
+  background: #ffffc0;
+  color: #0000c0;
+  font: bold 15px var(--font-ui);
+}
+
+/* Disabled labels and radios look grey, like WinForms. */
+.w-float .dim { color: var(--ink-disabled); }
+.w-float input:disabled + span { color: var(--ink-disabled); }
+.w-float .w-text.cyan { background: #a1fcfd; }
+.w-float .w-text:disabled { color: #6d6d6d; }
+.w-float .w-radio input { margin-right: 3px; }
+.w-float .w-btn { font-size: 14px; }
+.w-float .w-label { font-size: 14px; }
+.w-float .w-label.bold { font: bold 14px var(--font-section); }
+.w-float .w-legend { font-weight: bold; font-size: 14px; }
+.w-float .w-list td, .w-float .w-list th { font: 14px var(--font-mono); padding: 0 4px; }
+.w-float .w-list th { font-weight: bold; }
+.w-float .w-list tr.dm-page td { font-weight: bold; }
+.w-float .w-list input { vertical-align: -2px; margin-right: 4px; }

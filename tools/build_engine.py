@@ -19,10 +19,19 @@ doesn't need them.
 The zip is deterministic: files are sorted and every timestamp is fixed.
 So building twice without code changes gives byte-identical output,
 which keeps git diffs and browser caches honest.
+
+Self-test
+---------
+After building, the script imports the engine FROM THE ZIP (Python can
+import straight from a zip file) in a fresh Python process and calls
+api.boot(), exactly what the browser worker does. A missing file or an
+import error fails the build here, with the real traceback, instead of
+showing up later as "YASMAX could not start" in the browser.
 """
 
 from __future__ import annotations
 
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -33,6 +42,16 @@ OUTPUT = ROOT / "web" / "engine.zip"
 
 # Any fixed date works; zip timestamps can't go earlier than 1980.
 FIXED_TIME = (1980, 1, 1, 0, 0, 0)
+
+# Imports the engine from the zip and boots it, like web/js/worker.js does.
+SELF_TEST = """
+import json, sys
+sys.path.insert(0, sys.argv[1])
+from yasmax_engine import api
+info = json.loads(api.boot())
+print(f"engine {info['engine_version']}: {len(info['commands'])} commands, "
+      f"{len(info.get('isa', []))} opcodes")
+"""
 
 
 def collect_files() -> list[Path]:
@@ -60,5 +79,22 @@ def build() -> Path:
     return OUTPUT
 
 
+def self_test(zip_path: Path) -> None:
+    """Boot the engine from the zip in a clean process; exit 1 if it fails."""
+    result = subprocess.run(
+        [sys.executable, "-I", "-c", SELF_TEST, str(zip_path)],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(result.stderr.strip(), file=sys.stderr)
+        zip_path.unlink(missing_ok=True)
+        sys.exit(
+            "\nSELF-TEST FAILED: the engine cannot start from engine.zip (deleted it).\n"
+            "The traceback above names the file or import that is missing or broken."
+        )
+    print(f"Self-test OK: {result.stdout.strip()}")
+
+
 if __name__ == "__main__":
-    build()
+    self_test(build())

@@ -1,0 +1,111 @@
+/*
+ * File: web/css/layout-bottom.css
+ *
+ * WHERE everything sits in the bottom row of tab panels (regions H, I, J, K
+ * in docs/UI_SPEC.md). Same rules as css/layout.css: pixels measured from
+ * the YASMIN screenshot, plus --ex/--ey from js/ui/scale.js so the row
+ * moves down and widens when the window fills a larger browser.
+ * Positions inside a tab pane are relative to that pane.
+ */
+
+#p-progtabs { left: 17px;                          top: calc(678px + var(--ey)); width: calc(397px + var(--ex)); height: 230px; }
+#p-control  { left: calc(431px + var(--ex));        top: calc(684px + var(--ey)); width: calc(341px + var(--ex)); height: 224px; }
+#p-advanced { left: calc(775px + 2 * var(--ex));    top: calc(683px + var(--ey)); width: calc(307px + var(--ex)); height: 225px; }
+#p-regtabs  { left: calc(1103px + 3 * var(--ex));   top: calc(679px + var(--ey)); width: calc(339px + var(--ex)); height: 224px; }
+.bottom .w-tabs { inset: 0; }
+.bottom .w-label, .bottom .w-radio { font-size: 14px; }
+.bottom .w-btn { font-size: 14px; white-space: nowrap; }
+
+/* ---------- H: Program tab ---------- */
+#p-progtabs .grp-newprog { left: 7px; top: 31px; width: 178px; height: 119px; }
+#p-progtabs .grp-files { left: 192px; top: 31px; width: 195px; height: 119px; }
+#p-progtabs .w-legend { font-size: 15px; background: #f3f3f3; }
+#lbl-prog-name { left: 8px; top: 12px; }
+#prog-name { left: 10px; top: 37px; width: 75px; }
+#lbl-pages { left: 116px; top: 12px; }
+#prog-pages { left: 108px; top: 37px; width: 57px; height: 25px; }
+#lbl-prog-base { left: 10px; top: 65px; }
+#prog-base { left: 10px; top: 88px; width: 75px; }
+#btn-add { left: 102px; top: 70px; width: 63px; height: 38px; }
+#btn-save { left: 7px; top: 16px; width: 80px; height: 35px; }
+#btn-load { left: 7px; top: 68px; width: 79px; height: 37px; }
+#lbl-prog-filter { left: 107px; top: 3px; }
+#prog-filter { left: 96px; top: 25px; width: 94px; height: 26px; }
+#lbl-load-base { left: 104px; top: 60px; }
+#load-base { left: 95px; top: 81px; width: 70px; height: 23px; text-align: right; }
+#load-base-chk { position: absolute; left: 174px; top: 84px; }
+
+#btn-copy-clip { left: 192px; top: 156px; width: 195px; height: 34px; }
+
+/* ---------- H: Instructions tab (4 rows, as in YASMIN 7.5.50) ---------- */
+#p-progtabs [id^="btn-ins-"] { height: 40px; }
+#btn-ins-add, #btn-ins-above, #btn-ins-below { left: 13px; width: 142px; }
+#btn-ins-show, #btn-ins-down, #btn-ins-up { left: 164px; width: 126px; }
+#btn-ins-undo, #btn-ins-edit, #btn-ins-delete { left: 297px; width: 82px; }
+#btn-ins-add, #btn-ins-show, #btn-ins-undo { top: 10px; }
+#btn-ins-above, #btn-ins-down, #btn-ins-edit { top: 54px; }
+#btn-ins-below, #btn-ins-up, #btn-ins-delete { top: 98px; }
+#btn-ins-copy, #btn-ins-paste-above, #btn-ins-paste-below { top: 142px; }
+#btn-ins-copy { left: 13px; width: 112px; }
+#btn-ins-paste-above { left: 131px; width: 122px; }
+#btn-ins-paste-below { left: 259px; width: 122px; }
+
+/* ---------- H: Optimize - Assemble tab (7.5.50) ---------- */
+#btn-assemble { left: 12px; top: 70px; width: 92px; height: 40px; }
+#btn-optimize { left: 110px; top: 70px; width: 100px; height: 40px; }
+#lbl-goto { left: 218px; top: 58px; }
+#goto-index { left: 228px; top: 80px; width: 64px; height: 28px; text-align: right; }
+#btn-goto { left: 300px; top: 79px; width: 72px; height: 30px; }
+
+/* ---------- I: Program Control tab ---------- */
+#btn-step, #btn-run, #btn-stop { left: 19px; width: 90px; height: 47px; }
+#btn-step { top: 11px; }
+#btn-run { top: 69px; }
+#btn-stop { top: 129px; height: 45px; }
+#mode-instr { left: 122px; top: 13px; }
+#mode-clock { left: 122px; top: 34px; }
+#lbl-fast { left: 125px; top: 67px; }
+#lbl-slow { left: 125px; top: 154px; }
+#btn-reset-prog, #btn-show-pcb { left: 220px; width: 100px; height: 46px; }
+#btn-reset-prog { top: 70px; }
+#btn-show-pcb { top: 127px; }
+
+/* Speed slider: a Win7 vertical trackbar (Fast at the top, Slow at the bottom). */
+#speed { position: absolute; left: 160px; top: 76px; width: 44px; height: 92px; cursor: pointer; outline: none; }
+#speed .track {
+  position: absolute; left: 9px; top: 2px; width: 3px; height: 86px;
+  border: 1px solid #b0b0b0; border-right-color: #fff; border-bottom-color: #fff;
+  background: #e7eaea;
+}
+#speed .tick { position: absolute; left: 31px; width: 5px; height: 1px; background: #444; }
+#speed .thumb {
+  position: absolute; left: 0; width: 18px; height: 10px; margin-top: -6px;
+  border: 1px solid #707070; border-right: 0;
+  background: linear-gradient(#f6f6f6, #dcdcdc);
+}
+#speed .thumb::after {
+  content: ""; position: absolute; right: -7px; top: -1px;
+  border: 6px solid transparent; border-left: 7px solid #707070; border-right: 0;
+}
+#speed:focus-visible .thumb { outline: 1px dotted #000; }
+
+/* ---------- J: Advanced tab ---------- */
+#btn-compiler { left: 25px; top: 25px; width: 124px; height: 43px; }
+#btn-os { left: 170px; top: 26px; width: 115px; height: 43px; }
+#btn-io { left: 24px; top: 78px; width: 124px; height: 44px; }
+#btn-vos { left: 170px; top: 78px; width: 115px; height: 44px; }
+#btn-interrupts { left: 23px; top: 135px; width: 123px; height: 43px; }
+
+/* ---------- K: Registers tab ---------- */
+#lbl-reg-value { left: 37px; top: 30px; }
+#reg-value { left: 45px; top: 58px; width: 58px; height: 25px; }
+#btn-change { left: 114px; top: 49px; width: 76px; height: 37px; }
+#btn-reset-all { left: 223px; top: 48px; width: 95px; height: 37px; }
+#lbl-access { left: 27px; top: 107px; }
+#chk-access { position: absolute; left: 201px; top: 110px; }
+#lbl-set-size { left: 30px; top: 138px; }
+#reg-set-size { left: 200px; top: 135px; width: 51px; height: 25px; padding-left: 4px; }
+
+/* ---------- CPU Help tab: credit and disclaimer ---------- */
+.about { position: absolute; inset: 8px 12px; font: 13px/1.45 var(--font-ui); overflow: auto; }
+.about p { margin: 0 0 6px; }

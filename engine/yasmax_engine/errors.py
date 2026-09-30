@@ -44,6 +44,8 @@ class FaultCode(StrEnum):
     STACK_OVERFLOW = "stack_overflow"
     STACK_UNDERFLOW = "stack_underflow"
     DIVIDE_BY_ZERO = "divide_by_zero"
+    NO_INSTRUCTION = "no_instruction"
+    NOT_AVAILABLE = "not_available"
 
 
 class YasmaxError(Exception):

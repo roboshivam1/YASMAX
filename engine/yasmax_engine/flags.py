@@ -107,8 +107,7 @@ class StatusFlags:
     def as_sr_bits(self) -> int:
         """Pack the flags into an integer.
 
-        TODO(R-4): verify whether the SR register shows packed flags, and
-        in which bit order. This packing (OV=bit 2, Z=bit 1, N=bit 0) is
-        a placeholder and must not be displayed until verified.
+        YASMIN 7.5.50 showed SR = 1 with only Z set, so Z is bit 0.
+        TODO(R-4): N = bit 1 and OV = bit 2 are guesses.
         """
-        return (int(self.ov) << 2) | (int(self.z) << 1) | int(self.n)
+        return (int(self.ov) << 2) | (int(self.n) << 1) | int(self.z)

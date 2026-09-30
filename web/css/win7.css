@@ -1,0 +1,131 @@
+/*
+ * File: web/css/win7.css
+ *
+ * The LOOK of Windows 7 controls: window frame, title bar, group boxes,
+ * buttons, tabs, list views, value boxes, inputs and scrollbars.
+ * No positions here. Where things sit is in css/layout.css.
+ *
+ * Colours were sampled from a screenshot of YASMIN v7.2.27 on Windows 7.
+ * Fonts name the Windows originals first, then close matches that ship
+ * with macOS and Linux, so the window looks right everywhere.
+ */
+
+:root {
+  --face: #f0f0f0;
+  --ink: #000;
+  --ink-disabled: #a0a0a0;
+  --edge: #828790;
+  --group-edge: #d5dfe5;
+  --cyan: #a1fcfd;
+  --yellow: #ffff92;
+  --pale-yellow: #ffffc6;
+  --peach: #fae1c5;
+  --reg-grey: #e0e0e0;
+  --tab-blue: #77ace3;
+  --tab-blue-2: #a5ccf0;
+  --font-ui: "Segoe UI", Tahoma, "Helvetica Neue", Arial, sans-serif;
+  --font-section: "Verdana", "DejaVu Sans", "Bitstream Vera Sans", sans-serif;
+  --font-serif: "Times New Roman", "Liberation Serif", Times, serif;
+  --font-mono: "Courier New", "Liberation Mono", "Nimbus Mono PS", Courier, monospace;
+}
+
+/* ---------- window frame and title bar ---------- */
+.w-window {
+  position: relative;
+  background: linear-gradient(180deg, #b9d1ea 0, #7ea5cf 40px, #6f98c4 60%, #5f89b9 100%);
+  border: 1px solid #0b1520;
+  border-radius: 7px 7px 3px 3px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+.w-titlebar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  font: 14px var(--font-ui);
+  color: #000;
+  text-shadow: 0 0 8px #fff, 0 0 4px #fff;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.w-title-icon {
+  width: 16px; height: 10px;
+  background: linear-gradient(160deg, #eee, #777);
+  border-radius: 2px;
+  transform: skew(-25deg);
+}
+.w-caption-btns { margin-left: auto; display: flex; align-self: flex-start; }
+.w-caption-btns span {
+  width: 27px; height: 19px;
+  border: 1px solid #3b5a82;
+  border-top: 0;
+  background: linear-gradient(#dfe9f5, #a9c1e0 50%, #8eabd4 51%, #b9d0ec);
+  font: bold 12px/18px Arial, sans-serif;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 0 2px #000;
+}
+.w-caption-btns span:first-child { border-radius: 0 0 0 5px; }
+.w-caption-btns .close {
+  width: 46px;
+  border-radius: 0 0 5px 0;
+  background: linear-gradient(#eab0a4, #d6705d 50%, #c2412a 51%, #dd8b6f);
+}
+.w-client { position: absolute; background: var(--face); font: 13px var(--font-ui); color: var(--ink); }
+
+/* ---------- group box ---------- */
+.w-group {
+  position: absolute;
+  border: 1px solid var(--group-edge);
+  border-radius: 3px;
+  box-shadow: inset 1px 1px 0 #fff, 1px 1px 0 #fff;
+}
+.w-legend { position: absolute; top: -9px; left: 7px; padding: 0 3px; background: var(--face); line-height: 16px; white-space: nowrap; }
+.w-group.section > .w-legend { font: bold 14px var(--font-section); letter-spacing: 0.6px; top: -10px; }
+
+/* ---------- buttons ---------- */
+.w-btn {
+  position: absolute;
+  font: 15px/17px var(--font-ui);
+  color: #1b1b1b;
+  text-transform: uppercase;
+  border: 1px solid #707070;
+  border-radius: 3px;
+  background: linear-gradient(#f2f2f2, #ebebeb 50%, #dddddd 51%, #cfcfcf);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+  padding: 0 2px;
+}
+.w-btn:hover:not(:disabled) { background: linear-gradient(#eaf6fd, #d9f0fc 50%, #bee6fd 51%, #a7d9f5); border-color: #3c7fb1; }
+.w-btn:active:not(:disabled) { background: linear-gradient(#e5f4fc, #c4e5f6 50%, #98d1ef 51%, #68b3db); }
+.w-btn:disabled { color: var(--ink-disabled); border-color: #adb2b5; background: #f4f4f4; box-shadow: none; }
+
+/* ---------- tabs ---------- */
+.w-tabs { position: absolute; }
+.w-tabstrip { list-style: none; margin: 0; padding: 0 0 0 2px; display: flex; height: 30px; align-items: flex-end; }
+.w-tab {
+  font: 17px/26px var(--font-ui);
+  padding: 0 5px;
+  margin-right: -1px;
+  border: 1px solid #898c95;
+  border-bottom: 0;
+  background: linear-gradient(#fff, #f3f3f3);
+  cursor: default;
+  white-space: nowrap;
+}
+.w-tab.active {
+  color: #fff;
+  line-height: 29px;
+  background: linear-gradient(var(--tab-blue), #5d9be0);
+  border-color: #6f98c9;
+}
+.w-tabbody {
+  position: absolute;
+  inset: 30px 0 0 0;
+  border: 1px solid #898c95;
+  background: linear-gradient(#fcfcfc, var(--face) 20px);
+}
+.w-tabpane { position: absolute; inset: 0; }
+.w-tabpane[hidden] { display: none; }

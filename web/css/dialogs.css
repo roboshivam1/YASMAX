@@ -1,0 +1,81 @@
+/*
+ * File: web/css/dialogs.css
+ *
+ * Styles for js/ui/messageBox.js: a Windows 7 message box floating over
+ * a dimmed page. Kept separate from win7.css so each file stays short.
+ */
+
+.w-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.12);
+}
+.w-dialog {
+  min-width: 340px;
+  max-width: 480px;
+  background: linear-gradient(180deg, #b9d1ea 0, #8fb2d8 30px);
+  border: 1px solid #0b1520;
+  border-radius: 6px;
+  padding: 0 7px 7px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  font: 13px var(--font-ui);
+}
+.w-dialog-title {
+  height: 30px;
+  line-height: 30px;
+  padding-left: 2px;
+  text-shadow: 0 0 6px #fff;
+  position: relative;
+}
+.w-dialog-x {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 42px;
+  height: 18px;
+  line-height: 16px;
+  text-align: center;
+  color: #fff;
+  font-weight: bold;
+  border: 1px solid #6d2a1c;
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(#eab0a4, #d6705d 50%, #c2412a 51%, #dd8b6f);
+  cursor: default;
+}
+.w-dialog-body {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: #fff;
+  padding: 18px 16px;
+  border: 1px solid #8ba2bf;
+  border-bottom: 0;
+}
+.w-dialog-body p { margin: 0; line-height: 1.45; }
+.w-dialog-icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  font: bold 22px/32px Georgia, serif;
+  text-align: center;
+}
+.w-dialog-icon.info { background: radial-gradient(circle at 35% 30%, #7fb5f0, #1d5cbf); }
+.w-dialog-icon.info::before { content: "i"; }
+.w-dialog-icon.error { background: radial-gradient(circle at 35% 30%, #f28a7a, #b8200e); }
+.w-dialog-icon.error::before { content: "x"; }
+.w-dialog-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 12px;
+  background: var(--face);
+  border: 1px solid #8ba2bf;
+  border-top: 1px solid #dfdfdf;
+}
+.w-dialog-foot .w-btn { position: static; width: 86px; height: 24px; }

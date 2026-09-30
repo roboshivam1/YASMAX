@@ -73,6 +73,7 @@ async function boot() {
     engineVersion: info.engine_version,
     commands: info.commands,
     snapshot: info.snapshot,
+    isa: info.isa,
   });
 }
 

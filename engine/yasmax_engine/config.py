@@ -37,24 +37,34 @@ class MachineConfig:
     a new config with `dataclasses.replace()`.
     """
 
-    # TODO(R-1): verify width and signedness of registers and memory words.
-    word_bits: int = 32
+    # ISA document: "A word is 16 bits long"; immediate values are 2 bytes.
+    # TODO(R-1): confirm registers are also 16 bits wide (lab test in RESEARCH.md).
+    word_bits: int = 16
     signed: bool = True
 
     # Number of general purpose registers shown by default.
     # The screenshot shows "Select Register Set Size: 32".
     gpr_count: int = 32
-    # TODO(R-12): verify which sizes the dropdown actually offers.
-    gpr_set_sizes: tuple[int, ...] = (8, 16, 32)
+    # ISA document: register files of 8, 16, 32 or 64 registers.
+    gpr_set_sizes: tuple[int, ...] = (8, 16, 32, 64)
 
-    # TODO(R-3): the screenshot shows SP = 8096 with nothing loaded.
-    # Verify why, and whether the stack grows down or up.
+    # YASMIN 7.5.50: SP = 8096 with an empty stack and it grows UP by one
+    # word (8096 -> 8100 after two entries). TODO(R-3): the size limit.
     initial_sp: int = 8096
-    stack_grows_down: bool = True
+    stack_limit: int = 256
+
+    # Data memory page size: the original's data memory window shows
+    # 4 pages as 1024 bytes.
+    page_size: int = 256
 
     # ------------------------------------------------------------------
     # Derived values and helpers
     # ------------------------------------------------------------------
+
+    @property
+    def word_bytes(self) -> int:
+        """Bytes per word (SP moves by this much per stack entry)."""
+        return self.word_bits // 8
 
     @property
     def mask(self) -> int:

@@ -160,8 +160,9 @@ class SpecialRegisters:
 
     @classmethod
     def initial(cls, config: MachineConfig) -> SpecialRegisters:
-        """Values shown when the simulator first opens."""
-        return cls(SP=config.initial_sp)
+        """Values shown when the simulator first opens. YASMIN 7.5.50 shows
+        MAR 2 and MDR 0 before anything runs. TODO(research): why."""
+        return cls(SP=config.initial_sp, MAR=2, MDR="0")
 
     def reset(self, config: MachineConfig) -> None:
         """Back to initial values, keeping the same object (the machine
