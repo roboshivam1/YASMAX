@@ -14,7 +14,7 @@ Lab facts (YASMIN 7.5.50): PC is the LOGICAL address in the current
 program (BR = its base). After the last instruction PC stays on it.
 HLT: PC stays, a "CPU runtime" message appears, every time you STEP.
 RESET PROGRAM empties the stack and puts PC back on the top instruction.
-Double-clicking an instruction executes that instruction (tutorial).
+Clicking an instruction moves the PC to it; double-clicking executes it.
 """
 
 from __future__ import annotations
@@ -149,13 +149,18 @@ class ExecutionCommands:
         self._clear_exec_unit()
         self.run_state = RunState.IDLE if self.programs.programs else RunState.EMPTY
 
-    def execute_at(self, program: str, index: int) -> None:
-        """Double-click in the memory view: execute that instruction."""
+    def set_pc(self, program: str, index: int) -> None:
+        """Clicking an instruction: PC (the red arrow) moves to it, so STEP
+        and RUN continue from there (YASMIN 7.5.50)."""
         p = self.programs.get(program)
         ladd = p.ladd_of(index)
         self.current, self.special.BR, self.special.PC = p.name, p.base, ladd
         self._clear_exec_unit()
         self.run_state = RunState.IDLE
+
+    def execute_at(self, program: str, index: int) -> None:
+        """Double-click in the memory view: execute that instruction."""
+        self.set_pc(program, index)
         self.step()
 
     def set_breakpoint(self, program: str, index: int, on: bool) -> None:

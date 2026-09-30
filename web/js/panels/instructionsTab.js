@@ -10,13 +10,15 @@
  *     COPY             PASTE ABOVE  PASTE BELOW
  *
  * ADD NEW / INSERT / EDIT open the instruction dialog. COPY remembers the
- * selected instruction; PASTE ABOVE / BELOW insert a copy of it.
+ * selected instructions (Ctrl / Shift + click in the memory view selects
+ * several); PASTE ABOVE / BELOW insert copies of them, in order.
  * ADD NEW needs a program selected in the program list; the rest need an
  * instruction selected in the memory view. TODO(R-15): confirm these rules.
  * UNDO stays disabled and SHOW... reports "not built yet" until we know
  * exactly what they do.
  */
 
+import { messageBox } from "../ui/messageBox.js";
 import { button } from "../ui/widgets.js";
 import { openInstructionDialog } from "../windows/instructionDialog.js";
 
@@ -37,7 +39,7 @@ export function wireInstructions(el, ctx) {
   const $ = (id) => el.querySelector(`#${id}`);
   let program = null; // selected in the program list
   let instruction = null; // {program, index} selected in the memory view
-  let clipboard = null; // instruction text copied with COPY
+  let clipboard = null; // instruction texts copied with COPY
 
   function refresh() {
     $("btn-ins-add").disabled = !program;
@@ -52,7 +54,11 @@ export function wireInstructions(el, ctx) {
   $("btn-ins-add").addEventListener("click", () => dialog("add"));
   $("btn-ins-above").addEventListener("click", () => dialog("above"));
   $("btn-ins-below").addEventListener("click", () => dialog("below"));
-  $("btn-ins-edit").addEventListener("click", () => dialog("edit"));
+  const rowOf = (s) => ctx.store.get().memory.find((m) => m.program === s.program && m.index === s.index);
+  $("btn-ins-edit").addEventListener("click", () => {
+    if (rowOf(instruction)?.label) return messageBox("CPU Simulator", "A label cannot be edited. Delete it and add a new one.");
+    dialog("edit");
+  });
   $("btn-ins-show").addEventListener("click", () => ctx.notYet("SHOW..."));
 
   for (const [id, delta] of [["btn-ins-up", -1], ["btn-ins-down", 1]]) {
@@ -69,15 +75,18 @@ export function wireInstructions(el, ctx) {
   });
 
   $("btn-ins-copy").addEventListener("click", () => {
-    const row = ctx.store.get().memory.find((m) => m.program === instruction.program && m.index === instruction.index);
-    clipboard = row?.text ?? null;
+    const texts = (instruction.all ?? [instruction]).map(rowOf).filter((r) => r && !r.label).map((r) => r.text);
+    clipboard = texts.length ? texts : null;
     refresh();
   });
   for (const [id, offset] of [["btn-ins-paste-above", 0], ["btn-ins-paste-below", 1]]) {
     $(id).addEventListener("click", async () => {
       const { program: p, index } = instruction;
-      const reply = await ctx.send("insert_instruction", { program: p, index: index + offset, text: clipboard });
-      if (reply.ok) reselect({ program: p, index: index + offset });
+      for (const [i, text] of clipboard.entries()) {
+        const reply = await ctx.send("insert_instruction", { program: p, index: index + offset + i, text });
+        if (!reply.ok) return;
+      }
+      reselect({ program: p, index: index + offset });
     });
   }
 }

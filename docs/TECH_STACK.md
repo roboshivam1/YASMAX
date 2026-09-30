@@ -25,7 +25,7 @@ The guiding rule is to use the fewest tools that meet the goals: zero install, o
 | Engine tests | **pytest** | Test the engine with no browser at all |
 | Lint and format | **ruff** (lint + format) | One fast tool |
 | Types | Type hints, optional **mypy** later | Helps with a table-driven ISA |
-| Local server | `python3 -m http.server` | Nothing to install |
+| Local server | `python3 tools/serve.py` (http.server with caching off) | Nothing to install |
 | Build | `tools/build_engine.py`, which zips the engine for the worker | No bundler, npm or node needed |
 | E2E (later) | **Playwright for Python** | A smoke test that the worker boots and a STEP updates the UI |
 | Version control | Git + GitHub | |

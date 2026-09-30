@@ -12,6 +12,7 @@ and self.config (MachineConfig).
 
 from __future__ import annotations
 
+from .isa import isa_table
 from .program import Program
 
 
@@ -37,6 +38,10 @@ class InstructionCommands(_ProgramLookup):
 
     def move_instruction(self, program: str, index: int, delta: int) -> None:
         self._program(program).move(index, delta)
+
+    def isa(self) -> list[dict[str, object]]:
+        """The instruction table for the instruction dialog (also sent at boot)."""
+        return isa_table()
 
     def add_label(self, program: str, name: str, index: int | None = None) -> None:
         """NEW LABEL... -> Apply label (appends, or inserts at index)."""

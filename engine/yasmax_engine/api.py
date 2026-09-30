@@ -24,6 +24,8 @@ plus "result": ... when the command returns a value (e.g. data_memory).
   arguments. That is a bug in our JS, not the student's fault.
 - An "internal_error" event means a bug in the engine. It is caught here
   so one bug never kills the worker.
+- Running adds events on successful replies too: "output" (console text),
+  "halt", "end", "breakpoint" and "watch".
 
 Adding a command = add one entry to COMMANDS pointing at a Machine method.
 """
@@ -59,6 +61,21 @@ COMMANDS: dict[str, str] = {
     "write_data": "write_data",
     "write_data_bytes": "write_data_bytes",
     "reset_data_memory": "reset_data_memory",
+    "add_label": "add_label",
+    "step": "step",
+    "tick": "tick",
+    "fetch": "fetch",
+    "decode": "decode",
+    "execute": "execute",
+    "reset_program": "reset_program",
+    "execute_at": "execute_at",
+    "set_pc": "set_pc",
+    "isa": "isa",
+    "set_breakpoint": "set_breakpoint",
+    "console_input": "console_input",
+    "set_data_watch": "set_data_watch",
+    "save_program": "save_program",
+    "load_program": "load_program",
 }
 
 _machine: Machine | None = None
@@ -72,7 +89,9 @@ def _get_machine() -> Machine:
 
 
 def _reply(ok: bool, events: list[dict[str, Any]], result: Any = None) -> str:
-    reply = {"ok": ok, "snapshot": _get_machine().snapshot(), "events": events}
+    """Error events first, then what happened while running (output, HLT)."""
+    machine = _get_machine()
+    reply = {"ok": ok, "snapshot": machine.snapshot(), "events": events + machine.drain_events()}
     if result is not None:
         reply["result"] = result
     return json.dumps(reply)

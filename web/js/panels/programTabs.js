@@ -9,7 +9,11 @@
  *                ADD creates the program; the Program List dropdown lists
  *                ALL and every program; COPY TO CLIPBOARD copies the chosen
  *                program's instructions (one per line) to the clipboard.
- *                TODO(R-10): SAVE/LOAD need the original file format.
+ *                SAVE... downloads the chosen program (the Program List
+ *                dropdown, or the one selected in the program list for ALL)
+ *                as a YASMIN .sas file; LOAD... reads one. With the box
+ *                ticked, Base Address replaces the file's base (-1 keeps it).
+ *                TODO(R-10): the original's exact rules for these two.
  * Instructions:  see instructionsTab.js.
  * Optimize - Assemble (7.5.50): ASSEMBLE, OPTIMIZE, Instruction Index, GO TO.
  *                GO TO selects that instruction of the selected program;
@@ -35,6 +39,7 @@ function programTab() {
   const files = group(
     "Files",
     button("SAVE...", { id: "btn-save", disabled: true }) + button("LOAD...", { id: "btn-load" }) +
+      '<input type="file" id="load-file" accept=".sas,.txt" hidden>' +
       label("lbl-prog-filter", "Program List") + dropdown(["ALL"], "ALL", { id: "prog-filter" }) +
       label("lbl-load-base", "Base Address") + textBox("-1", { id: "load-base" }) +
       checkbox({ id: "load-base-chk", checked: true }),
@@ -70,7 +75,26 @@ export function mount(el, ctx) {
   $("btn-add").addEventListener("click", () =>
     send("create_program", { name: $("prog-name").value, base: $("prog-base").value, pages: $("prog-pages").value }),
   );
-  $("btn-load").addEventListener("click", () => notYet("Loading programs"));
+  $("btn-save").addEventListener("click", async () => {
+    const names = store.get().programs.map((p) => p.name);
+    const which = $("prog-filter").value;
+    const name = which !== "ALL" ? which : names.includes(selectedProgram) ? selectedProgram : names[0];
+    const reply = await send("save_program", { program: name });
+    if (!reply.ok) return;
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([reply.result.text], { type: "text/plain" }));
+    link.download = reply.result.filename;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  });
+  $("btn-load").addEventListener("click", () => $("load-file").click());
+  $("load-file").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    event.target.value = "";
+    if (!file) return;
+    const base = $("load-base-chk").checked ? $("load-base").value : "-1";
+    await send("load_program", { text: await file.text(), base });
+  });
   store.subscribe((snap) => {
     const names = ["ALL", ...snap.programs.map((p) => p.name)];
     const box = $("prog-filter");
@@ -79,6 +103,7 @@ export function mount(el, ctx) {
       box.innerHTML = names.map((n) => `<option>${n.replace(/</g, "&lt;")}</option>`).join("");
     }
     box.value = keep;
+    $("btn-save").disabled = snap.programs.length === 0;
   });
   $("btn-copy-clip").addEventListener("click", async () => {
     const which = $("prog-filter").value;

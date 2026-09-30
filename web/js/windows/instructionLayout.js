@@ -11,6 +11,7 @@
  *   Source / Destination Operand, each with:
  *     ( ) Value [....]     frame: Literal Value, Direct Mem, Indirect Mem, Rel Direct Mem
  *     ( ) Register [R00]   frame: Reg Direct, Reg Indirect, Rel Reg Direct, Rel Reg Indirect, Up/Down
+ *   (jumps: a dropdown on the Source Value box lists the program's labels)
  *   Memory read cycles, Memory write cycles, Base address
  *   description strip
  *   NEW LABEL...   NEW INSTRUCTION   CLOSE
@@ -60,6 +61,8 @@ function operand(op, title, y) {
     text(title, 146, y.title, "bold") +
     `<label class="w-radio" style="${at(152, y.valRow)}"><input type="radio" name="ind-${op}-kind" value="value" id="ind-${op}-kind-val"> <span>Value</span></label>` +
     `<input type="text" class="w-text cyan" id="ind-${op}-val" style="${at(234, y.valBox, 72, 24)}">` +
+    // Label list for jumps ($L0), shown as a dropdown arrow on the Value box.
+    `<select class="w-select lbl-pick" id="ind-${op}-lbl" hidden style="${at(284, y.valBox, 24, 24)}"></select>` +
     `<label class="w-radio" style="${at(152, y.regRow)}"><input type="radio" name="ind-${op}-kind" value="register" id="ind-${op}-kind-reg"> <span>Register</span></label>` +
     regs.replace("<select", `<select style="${at(234, y.regBox, 82, 24)}"`) +
     // Value-mode frame

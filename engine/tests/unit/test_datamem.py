@@ -24,6 +24,9 @@ def fresh():
     call("create_program", name="TRAIN", base=100, pages=2)
 
 
+FRESH = [2] + [0] * 511  # YASMIN 7.5.50 shows 02 in byte 0 of a new program
+
+
 def mem():
     return call("data_memory", program="TRAIN")["result"]
 
@@ -31,7 +34,7 @@ def mem():
 def test_size_is_pages_times_256():
     m = mem()
     assert (m["name"], m["pid"], m["pages"], m["size"]) == ("TRAIN", 0, 2, 512)
-    assert m["bytes"] == [0] * 512
+    assert m["bytes"] == FRESH
 
 
 def test_debug_control_row_update():
@@ -47,8 +50,9 @@ def test_bad_hex_bytes_are_rejected(bad):
 
 @pytest.mark.parametrize(
     ("kind", "value", "expected"),
-    [("integer", "258", [2, 1]), ("integer", "-1", [255, 255]), ("boolean", "True", [1]),
-     ("boolean", "False", [0]), ("string", "Hi!", [72, 105, 33])],
+    [("integer", "25", [2, 0, 25, 0]), ("integer", "258", [2, 0, 2, 1]),
+     ("integer", "-1", [2, 0, 255, 255]), ("boolean", "True", [1, 1]),
+     ("boolean", "False", [1, 0]), ("string", "Hi!", [3, 72, 105, 33, 0])],
 )  # fmt: skip
 def test_initialise_data(kind, value, expected):
     assert call("write_data", program="TRAIN", address="16", kind=kind, value=value)["ok"]
@@ -58,12 +62,12 @@ def test_initialise_data(kind, value, expected):
 @pytest.mark.parametrize(
     ("kind", "value", "address"),
     [("integer", "70000", 0), ("integer", "x", 0), ("boolean", "maybe", 0),
-     ("string", "", 0), ("string", "é", 0), ("integer", "1", 511), ("boolean", "True", 512)],
+     ("string", "", 0), ("string", "é", 0), ("integer", "1", 509), ("boolean", "True", 511)],
 )  # fmt: skip
 def test_initialise_data_errors(kind, value, address):
     reply = call("write_data", program="TRAIN", address=address, kind=kind, value=value)
     assert not reply["ok"] and reply["events"][0]["type"] == "program_error"
-    assert mem()["bytes"] == [0] * 512
+    assert mem()["bytes"] == FRESH
 
 
 def test_reset_all():
@@ -75,7 +79,7 @@ def test_reset_all():
 def test_programs_have_separate_data():
     call("create_program", name="OTHER", base=500)
     call("write_data", program="OTHER", address=0, kind="boolean", value="True")
-    assert mem()["bytes"][0] == 0
+    assert mem()["bytes"][0] == 2
     assert call("data_memory", program="OTHER")["result"]["size"] == 256
 
 
@@ -88,7 +92,7 @@ def test_structured_operands_for_edit():
     call("add_instruction", program="TRAIN", text="JLT -@R03")
     row = call("snapshot")["snapshot"]["memory"][0]
     assert row["op"] == "JLT"
-    assert row["operands"] == [{"mode": 7, "value": 3, "negative": True}]
+    assert row["operands"] == [{"mode": 7, "value": 3, "negative": True, "label": None}]
 
 
 def test_program_list_start_and_type_as_in_7_5_50():

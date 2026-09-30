@@ -9,11 +9,12 @@
  *   Fast..Slow slider      RUN speed (a Win7 vertical trackbar)
  *   RESET PROGRAM, SHOW PCB...
  *
- * The execution buttons start disabled, as in the screenshot with no
- * program loaded. They are wired up when the engine can step (later batch).
- * The step mode and speed already work: they are kept in ctx.ui, where the
- * RUN code will read them.
- * TODO(R-18): map slider positions to real run speeds.
+ * STEP / RUN / STOP go through ctx.runner (js/runner.js). STEP does one
+ * instruction, or one phase (FETCH, DECODE, EXECUTE) "by single tick".
+ * RESET PROGRAM empties the stack and puts PC on the top instruction.
+ * Buttons are enabled only when there is something in memory; while RUN
+ * is going, only STOP is. SHOW PCB... belongs to the OS simulator.
+ * TODO(R-15): confirm the original's enable rules.
  *
  * CPU Help tab: credit to the original and the YASMAX disclaimer (PRD F-51).
  * CPU View tab: empty until captured from the original (UI_SPEC U-5).
@@ -77,7 +78,8 @@ function wireSpeed(slider, ui) {
   set(ui.speed);
 }
 
-export function mount(el, { ui }) {
+export function mount(el, ctx) {
+  const { ui, runner, send, store, notAvailable } = ctx;
   el.classList.add("bottom");
   el.innerHTML = tabs(
     [
@@ -94,4 +96,20 @@ export function mount(el, { ui }) {
     });
   }
   wireSpeed(el.querySelector("#speed"), ui);
+
+  const $ = (id) => el.querySelector(`#${id}`);
+  $("btn-step").addEventListener("click", () => runner.step());
+  $("btn-run").addEventListener("click", () => runner.run());
+  $("btn-stop").addEventListener("click", () => runner.stop());
+  $("btn-reset-prog").addEventListener("click", () => send("reset_program"));
+  $("btn-show-pcb").addEventListener("click", () => notAvailable("The process control block (PCB)"));
+
+  function refresh() {
+    const loaded = (store.get()?.memory.length ?? 0) > 0;
+    for (const id of ["btn-step", "btn-run", "btn-reset-prog"]) $(id).disabled = !loaded || runner.running;
+    $("btn-stop").disabled = !runner.running;
+    $("btn-show-pcb").disabled = !loaded;
+  }
+  store.subscribe(refresh);
+  document.addEventListener("yasmax:running", refresh);
 }

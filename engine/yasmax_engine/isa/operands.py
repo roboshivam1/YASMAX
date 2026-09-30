@@ -8,6 +8,9 @@ Turns instruction TEXT into structured instructions and back:
 
 Operand syntax comes from the ISA document's addressing-mode table:
     #n  Rnn  n  @Rnn  @n  +n/-n  +Rnn/-Rnn  +@Rnn/-@Rnn
+plus $Name, a label used as a jump address ("JNE $L0", Programming
+Model 2 tutorial). A label operand is a memory-direct operand whose
+address is looked up when the instruction runs.
 Numbers are decimal. Values are 2 bytes; register numbers 00..63.
 
 Every parsed instruction is checked against the allowed forms in
@@ -39,6 +42,7 @@ _PATTERNS = [
     (AM.REL, re.compile(r"^([+-]\d+)$")),
     (AM.MEM, re.compile(r"^(\d+)$")),
 ]
+_LABEL = re.compile(r"^\$([A-Za-z_][A-Za-z0-9_]*)$")
 
 
 @dataclass(frozen=True)
@@ -49,13 +53,14 @@ class Operand:
     mode: AM
     value: int
     negative: bool = False
+    label: str | None = None
 
     def __str__(self) -> str:
         sign = "-" if self.negative else "+"
         return {
             AM.IMM: f"#{self.value}",
             AM.REG: f"R{self.value:02d}",
-            AM.MEM: f"{self.value}",
+            AM.MEM: f"${self.label}" if self.label else f"{self.value}",
             AM.REG_IND: f"@R{self.value:02d}",
             AM.MEM_IND: f"@{self.value}",
             AM.REL: f"{self.value:+d}",
@@ -67,6 +72,8 @@ class Operand:
 def parse_operand(text: str) -> Operand:
     """Parse one operand, e.g. "#20", "R00", "@R01", "-R04"."""
     t = text.strip().replace(" ", "")
+    if m := _LABEL.match(t):
+        return Operand(AM.MEM, 0, label=m.group(1))
     for mode, pattern in _PATTERNS:
         m = pattern.match(t)
         if not m:

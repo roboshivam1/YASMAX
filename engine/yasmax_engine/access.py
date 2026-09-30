@@ -18,6 +18,7 @@ the addressing-mode rules live in one place.
 
 "here" is the LAdd of the executing instruction (ISA doc: "20 bytes ahead
 of the current address"). Memory means the program's data memory.
+A jump to $Name goes to that label's LAdd.
 """
 
 from __future__ import annotations
@@ -37,6 +38,7 @@ class Access:
     def __init__(self, machine: Machine, program: Program, ins: Instruction, here: int) -> None:
         self.m = machine
         self.cfg = machine.config
+        self.program = program
         self.data = program.data
         self.ins = ins
         self.here = here
@@ -87,7 +89,7 @@ class Access:
         if op.mode == AM.REG:
             return self.get_reg(op)
         if op.mode == AM.MEM:
-            return op.value
+            return self.label_address(op) if op.label else op.value
         if op.mode == AM.REL:
             return self.here + op.value
         if op.mode == AM.REL_REG:
@@ -98,6 +100,14 @@ class Access:
             FaultCode.INVALID_INSTRUCTION, f"{self.ins}: operand {op} is not a jump address"
         )
 
+    def label_address(self, op: Operand) -> int:
+        """Where $Name points: the LAdd of that label (0 bytes, so it is
+        also the address of the instruction after it)."""
+        found = self.program.label_address(op.label)
+        if found is None:
+            raise MachineFault(FaultCode.NO_INSTRUCTION, f"There is no label {op.label}.")
+        return found
+
     def shown_value(self, op: Operand) -> int | None:
         """Value for the Execution Unit "Opnd = value" boxes. Never faults
         and never marks registers as accessed."""
@@ -106,6 +116,8 @@ class Access:
                 return op.value
             if op.mode in (AM.REG, AM.REL_REG):
                 return self.m.gpr.peek(self.reg(op))
+            if op.mode == AM.MEM and op.label:
+                return self.label_address(op)
             if op.mode in (AM.MEM, AM.REL):
                 return op.value
             if op.mode == AM.REG_IND:

@@ -8,10 +8,12 @@
  *                     8 bytes per row, Data shows printable ASCII else "."
  *   Initialise Data   Integer / Boolean / String value at an address, UPDATE
  *   Debug control     click a row, edit its 8 bytes in hex, UPDATE;
- *                     B0..B7 "suspend when modified" checkboxes (kept, used
- *                     once execution exists), RESET clears them
+ *                     B0..B7 "suspend when modified" checkboxes: RUN stops
+ *                     when code writes a ticked byte; RESET clears them
  *   Stay on top, Status, SHOW PAGE TABLE..., Pages, Size, RESET ALL, CLOSE
  *
+ * Initialise Data writes tagged values (engine datamem.py): a string at
+ * 48 shows as 03 68 65 ... 00, an integer 25 as 02 00 19 00.
  * PAdd shows "----" as in the screenshot of a program that is not loaded
  * as a process. The window re-reads memory from the engine after every
  * snapshot, so it stays current while programs run.
@@ -65,11 +67,13 @@ export function openDataMemory(ctx, program) {
   const body = $("dm-list").querySelector("tbody");
   let mem = null;
   let rowAddr = 0;
+  const watched = new Set();
 
   function selectRow(addr) {
     rowAddr = addr;
     for (const tr of body.querySelectorAll("tr[data-addr]")) tr.classList.toggle("selected", Number(tr.dataset.addr) === addr);
     win.body.querySelectorAll(".dm-byte").forEach((box, i) => (box.value = hex(mem.bytes[addr + i] ?? 0)));
+    win.body.querySelectorAll(".dm-watch").forEach((box, i) => (box.checked = watched.has(addr + i)));
   }
 
   function render() {
@@ -111,7 +115,19 @@ export function openDataMemory(ctx, program) {
     const values = [...win.body.querySelectorAll(".dm-byte")].map((b) => b.value);
     ctx.send("write_data_bytes", { program, address: rowAddr, values });
   });
-  $("dm-watch-reset").addEventListener("click", () => win.body.querySelectorAll(".dm-watch").forEach((c) => (c.checked = false)));
+  const sendWatch = () => ctx.send("set_data_watch", { program, addresses: [...watched] });
+  win.body.querySelectorAll(".dm-watch").forEach((box, i) =>
+    box.addEventListener("change", () => {
+      if (box.checked) watched.add(rowAddr + i);
+      else watched.delete(rowAddr + i);
+      sendWatch();
+    }),
+  );
+  $("dm-watch-reset").addEventListener("click", () => {
+    watched.clear();
+    win.body.querySelectorAll(".dm-watch").forEach((c) => (c.checked = false));
+    sendWatch();
+  });
   $("dm-reset").addEventListener("click", () => ctx.send("reset_data_memory", { program }));
   $("dm-top").addEventListener("change", (e) => win.setStayOnTop(e.target.checked));
   $("dm-pagetable").addEventListener("click", () => ctx.notAvailable("The page table"));

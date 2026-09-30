@@ -10,11 +10,15 @@
  *   destination modes follow the chosen source mode (e.g. MVS);
  * - NEW INSTRUCTION builds the text ("MOV #20, R00") and sends it to the
  *   engine, which validates it again. The dialog stays open, like YASMIN.
+ * - A jump to a label: pick it from the dropdown on the Value box (or type
+ *   $Name with Direct Mem): "JNE $L0", as in the Programming Model 2 tutorial.
+ *   TODO(research): the exact look of YASMIN 7.5.50's label dropdown.
  * Exec. Clocks and Memory read/write cycles are shown but not used yet.
  * TODO(research): what they change; how 1-operand instructions are placed
  * (here always in Source Operand); the button text when editing.
  */
 
+import { messageBox } from "../ui/messageBox.js";
 import { openWindow } from "../ui/window.js";
 import { GROUP_ROWS, HEIGHT, WIDTH, layoutHtml } from "./instructionLayout.js";
 import { openLabelDialog } from "./labelDialog.js";
@@ -25,6 +29,10 @@ const REG_MODES = [1, 3, 6, 7];
 const YASMIN_TEXT = { MOV: "Moves data to register", ADD: "Adds values in registers", OUT: "Puts output from register or memory" };
 
 export function openInstructionDialog(ctx, { mode, program, index = 0 }) {
+  if (!ctx.isa?.length) {
+    messageBox("YASMAX", "The instruction set has not loaded. Reload the page (Shift + Reload).", { icon: "error" });
+    return null;
+  }
   const win = openWindow({ id: "instructions", title: "Instructions: CPU 0", width: WIDTH, height: HEIGHT, html: layoutHtml() });
   const $ = (id) => win.body.querySelector(`#${id}`);
   const snap = ctx.store.get();
@@ -77,7 +85,31 @@ export function openInstructionDialog(ctx, { mode, program, index = 0 }) {
     const rel = [6, 7].includes(checkedMode(op));
     for (const d of ["up", "down"]) $(`ind-${op}-${d}`).disabled = !rel;
   }
-  const refresh = () => { refreshOperand("s"); refreshOperand("d"); };
+  // ---- label dropdown (Control Transfer: JMP $L0, CAL $L2, LOOP $L0, R01) ----
+  function labelNames() {
+    return ctx.store.get().memory.filter((m) => m.program === target.program && m.label).map((m) => m.text.slice(0, -1));
+  }
+  function refreshLabels() {
+    const pick = $("ind-s-lbl");
+    const show = spec?.group === "Control Transfer" && allowed("s").includes(2);
+    pick.hidden = !show;
+    $("ind-s-val").style.width = show ? "50px" : "72px";
+    if (!show) return;
+    pick.innerHTML = '<option value=""></option>' + labelNames().map((n) => `<option value="$${n}">${n}</option>`).join("");
+    pick.disabled = !labelNames().length;
+  }
+  $("ind-s-lbl").addEventListener("mousedown", refreshLabels);
+  $("ind-s-lbl").addEventListener("change", (e) => {
+    const picked = e.target.value;
+    if (!picked) return;
+    $("ind-s-kind-val").checked = true;
+    refresh();
+    for (const r of radios("s", "v")) r.checked = Number(r.dataset.mode) === 2;
+    $("ind-s-val").value = picked;
+    refresh();
+  });
+
+  const refresh = () => { refreshOperand("s"); refreshOperand("d"); refreshLabels(); };
 
   // ---- groups and op codes ----
   function showGroup(group, select) {
@@ -117,7 +149,7 @@ export function openInstructionDialog(ctx, { mode, program, index = 0 }) {
       $(`ind-${op}-kind-${VALUE_MODES.includes(o.mode) ? "val" : "reg"}`).checked = true;
       refresh();
       for (const r of radios(op)) if (Number(r.dataset.mode) === o.mode) r.checked = true;
-      if (VALUE_MODES.includes(o.mode)) $(`ind-${op}-val`).value = o.value;
+      if (VALUE_MODES.includes(o.mode)) $(`ind-${op}-val`).value = o.label ? `$${o.label}` : o.value;
       else $(`ind-${op}-reg`).value = `R${String(o.value).padStart(2, "0")}`;
       if ([6, 7].includes(o.mode)) $(`ind-${op}-${o.negative ? "down" : "up"}`).checked = true;
       refresh();
@@ -129,7 +161,15 @@ export function openInstructionDialog(ctx, { mode, program, index = 0 }) {
   $("ind-ops").addEventListener("click", (e) => e.target.dataset.op && selectOp(e.target.dataset.op));
   win.body.addEventListener("change", (e) => e.target.type === "radio" && refresh());
   $("ind-close").addEventListener("click", () => win.close());
-  $("ind-label").addEventListener("click", () => openLabelDialog(ctx));
+  $("ind-label").addEventListener("click", () =>
+    openLabelDialog(async (name) => {
+      // Labels go where the next instruction would: appended, or inserted.
+      const { mode: m, program: p, index: i } = target;
+      const at = m === "add" ? null : m === "below" ? i + 1 : i;
+      const reply = await ctx.send("add_label", { program: p, name, index: at });
+      if (reply.ok && m !== "add") target = { ...target, index: i + 1 };
+    }),
+  );
   $("ind-ok").addEventListener("click", async () => {
     if (!spec) return;
     const text = instructionText();

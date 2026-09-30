@@ -85,6 +85,12 @@ class Program:
                 return index, line
         return None
 
+    def label_address(self, name: str) -> int | None:
+        for ladd, line in self.layout():
+            if isinstance(line, Label) and line.name.lower() == name.lower():
+                return ladd
+        return None
+
     def ladd_of(self, index: int) -> int:
         return self.layout()[self._check(index)][0]
 

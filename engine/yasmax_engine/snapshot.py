@@ -46,7 +46,12 @@ def _memory_rows(m: Machine) -> list[dict[str, object]]:
                     "operands": []
                     if label
                     else [
-                        {"mode": int(o.mode), "value": o.value, "negative": o.negative}
+                        {
+                            "mode": int(o.mode),
+                            "value": o.value,
+                            "negative": o.negative,
+                            "label": o.label,
+                        }
                         for o in ins.operands
                     ],
                     "base": program.base,

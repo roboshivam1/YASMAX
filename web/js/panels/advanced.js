@@ -7,11 +7,13 @@
  * OUT and IN instructions use. The other buttons open separate YASMIN tools
  * (compiler, OS simulator, virtual OS, interrupts) that YASMAX does not
  * recreate (PRD §4, F-50): they are drawn as in the original and show the
- * standard "not available" notice. The New CPU tab does the same instead
- * of switching, since YASMAX simulates one CPU.
+ * standard "not available" notice. The New CPU tab (YASMIN 7.5.50) shows
+ * the CPU List, Coupling (TIGHT / LOOSE) and Endianness (LITTLE / BIG);
+ * START NEW CPU... shows the notice, since YASMAX simulates one CPU.
+ * TODO(research): whether Endianness changes how words are stored.
  */
 
-import { button, tabs } from "../ui/widgets.js";
+import { button, dropdown, group, radio, tabs } from "../ui/widgets.js";
 import { openConsole } from "../windows/console.js";
 
 // [button id, caption, feature name for the notice]
@@ -23,13 +25,23 @@ const BUTTONS = [
   ["btn-interrupts", "INTERRUPTS...", "The interrupts window"],
 ];
 
+function newCpuTab() {
+  return (
+    '<span class="w-label" id="lbl-cpu-list">CPU List</span>' +
+    dropdown(["0: Tightly coupled"], "0: Tightly coupled", { id: "cpu-list" }) +
+    group("Coupling", radio("coupling", "TIGHT", { checked: true }) + radio("coupling", "LOOSE"), { cls: "grp-coupling" }) +
+    group("Endianness", radio("endian", "LITTLE", { checked: true }) + radio("endian", "BIG"), { cls: "grp-endian" }) +
+    button("START NEW CPU...", { id: "btn-new-cpu" })
+  );
+}
+
 export function mount(el, ctx) {
   const { notAvailable } = ctx;
   el.classList.add("bottom");
   el.innerHTML = tabs(
     [
       { label: "Advanced", html: BUTTONS.map(([id, caption]) => button(caption, { id })).join("") },
-      { label: "New CPU", html: "" },
+      { label: "New CPU", html: newCpuTab() },
     ],
     0,
   );
@@ -39,9 +51,5 @@ export function mount(el, ctx) {
     el.querySelector(`#${id}`).addEventListener("click", open);
   }
 
-  // Stop the click before the tab control switches panes (see wireTabs).
-  el.querySelector('.w-tab[data-tab="1"]').addEventListener("click", (event) => {
-    event.stopPropagation();
-    notAvailable("Adding another CPU");
-  });
+  el.querySelector("#btn-new-cpu").addEventListener("click", () => notAvailable("Adding another CPU"));
 }

@@ -9,11 +9,12 @@
  * F-41/F-42 (later). Until then, their buttons report "not available"
  * through ctx.notAvailable.
  *
- * The Execution Unit tab is empty until it is captured from the original
- * (docs/UI_SPEC.md, U-2).
+ * Execution Unit tab (YASMIN 7.5.50): FETCH / DECODE / EXECUTE by hand,
+ * see execUnit.js.
  */
 
 import { button, dropdown, group, radio, tabs } from "../ui/widgets.js";
+import { execUnitHtml, wireExecUnit } from "./execUnit.js";
 
 function cachePipelineTab() {
   const pipeline = group(
@@ -35,15 +36,17 @@ function cachePipelineTab() {
   return pipeline + cache;
 }
 
-export function mount(el, { notAvailable }) {
+export function mount(el, ctx) {
+  const { notAvailable } = ctx;
   el.innerHTML = tabs(
     [
       { label: "Cache - Pipeline", html: cachePipelineTab() },
-      { label: "Execution Unit", html: "" },
+      { label: "Execution Unit", html: execUnitHtml() },
     ],
     0,
   );
 
   el.querySelector("#btn-show-pipeline").addEventListener("click", () => notAvailable("Pipeline view"));
   el.querySelector("#btn-show-cache").addEventListener("click", () => notAvailable("Cache view"));
+  wireExecUnit(el, ctx);
 }

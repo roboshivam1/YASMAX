@@ -1,0 +1,95 @@
+/*
+ * File: web/css/execution.css
+ *
+ * Styles for the YASMIN 7.5.50 features added with the execution engine:
+ * memory view breakpoint checkbox, PC arrow and labels; stack TOS / BOS
+ * markers; CPU Mode; the Execution Unit and New CPU tabs; the help
+ * balloon. Loaded after layout*.css, so it can adjust earlier rules.
+ */
+
+/* ---------- A: memory view ---------- */
+#mem-list td input.bp { width: 14px; height: 14px; margin: 0 2px 0 0; vertical-align: -2px; }
+#mem-list .pc-arrow { display: inline-block; width: 18px; color: #d00000; font: bold 15px Arial, sans-serif; visibility: hidden; }
+#mem-list tr.current .pc-arrow { visibility: visible; }
+#mem-list tr.selected .pc-arrow { color: #fff; }
+#mem-list td { cursor: default; }
+
+/* ---------- E: stack markers ---------- */
+#stack-list td input { width: 14px; height: 14px; margin: 0 4px 0 0; vertical-align: -2px; }
+#stack-list .stack-mark { color: #0000c0; font: bold 14px var(--font-mono); }
+#stack-list tr.selected .stack-mark { color: #fff; }
+
+/* ---------- D: status flags + CPU Mode (flags box made narrower) ---------- */
+#p-special .flags-box { width: 176px; }
+#flag-ov { left: 62px; }
+#lbl-z { left: 100px; } #flag-z { left: 120px; }
+#lbl-n { left: 150px; } #flag-n { left: 172px; }
+#lbl-cpu-mode { left: 208px; top: 119px; }
+#mode-user, #mode-kernel { left: 212px; display: inline-flex; flex-direction: row-reverse; gap: 26px; font-size: 13px; }
+#mode-user { top: 144px; font-weight: bold; pointer-events: none; }
+#mode-kernel { top: 164px; }
+
+/* ---------- B: Execution Unit tab ---------- */
+#eu-fetch, #eu-decode { left: 10px; width: 100px; height: 36px; }
+#eu-fetch { top: 10px; }
+#eu-decode { top: 54px; }
+#eu-lbl-ins { left: 118px; top: 20px; font-size: 14px; }
+#eu-ins { left: 196px; top: 12px; width: 132px; height: 30px; font: 16px var(--font-ui); background: #fff; }
+#eu-lbl-op { left: 124px; top: 64px; font-size: 14px; }
+#eu-op { left: 196px; top: 56px; width: 90px; height: 30px; font: 16px var(--font-ui); background: #fff; }
+#p-cache .eu-opnd { top: 108px; width: 156px; height: 116px; }
+#p-cache .eu-opnd1 { left: 8px; }
+#p-cache .eu-opnd2 { left: 172px; }
+#p-cache .eu-opnd .w-text { background: #fff; text-align: center; }
+#p-cache .eu-mode { font-size: 13px; pointer-events: none; }
+#eu-execute { left: 10px; top: 232px; width: 110px; height: 30px; }
+
+/* ---------- J: New CPU tab ---------- */
+#lbl-cpu-list { left: 26px; top: 22px; font-size: 14px; }
+#cpu-list { left: 104px; top: 16px; width: 186px; height: 26px; }
+#p-advanced .grp-coupling { left: 24px; top: 64px; width: 110px; height: 70px; }
+#p-advanced .grp-endian { left: 160px; top: 64px; width: 120px; height: 70px; }
+#p-advanced .grp-coupling .w-radio:first-of-type, #p-advanced .grp-endian .w-radio:first-of-type { left: 10px; top: 16px; }
+#p-advanced .grp-coupling .w-radio:last-of-type, #p-advanced .grp-endian .w-radio:last-of-type { left: 10px; top: 40px; }
+#btn-new-cpu { left: 60px; top: 146px; width: 180px; height: 38px; }
+
+/* ---------- help balloon (js/ui/balloon.js) ---------- */
+.w-balloon {
+  position: absolute;
+  z-index: 3000;
+  max-width: 540px;
+  padding: 8px 12px 10px;
+  background: #fff;
+  border: 1px solid #767676;
+  border-radius: 4px;
+  box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.25);
+  font: 13px/17px var(--font-ui);
+  color: #222;
+  pointer-events: none;
+}
+.w-balloon::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: -14px;
+  border: 7px solid transparent;
+  border-top-color: #767676;
+  border-left-color: #767676;
+}
+.w-balloon-title { font-size: 17px; color: #1e3f8a; margin-bottom: 4px; }
+.w-balloon-i {
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #1f6fd0;
+  color: #fff;
+  font: bold italic 13px/17px Georgia, serif;
+  text-align: center;
+}
+
+/* ---------- instruction dialog: label dropdown on the Value box ---------- */
+.w-float select.lbl-pick { padding: 0; color: transparent; }
+.w-float select.lbl-pick option { color: #000; }
+.w-float select.lbl-pick[hidden] { display: none; }

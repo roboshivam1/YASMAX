@@ -11,7 +11,10 @@
  * Every panel gets the same `ctx` object:
  *   store        latest snapshot + subscribe()        (js/store.js)
  *   engine       call(cmd, args) to the worker        (js/bridge.js)
- *   send         call + publish snapshot + show any error dialog
+ *   send         call + publish snapshot + show any error dialog; also puts
+ *                console output in the Console and shows HLT / end /
+ *                breakpoint messages (events from the engine)
+ *   runner       STEP / RUN / STOP                    (js/runner.js)
  *   ui           UI-only settings (step mode, run speed) shared by panels
  *   notAvailable notice for YASMIN parts YASMAX won't recreate
  *   notYet       notice for YASMAX features not built yet
@@ -21,6 +24,8 @@
  */
 
 import { createEngine } from "./bridge.js";
+import { createRunner } from "./runner.js";
+import { consoleWrite } from "./windows/console.js";
 import { createStore } from "./store.js";
 import { refillAll } from "./ui/lists.js";
 import { messageBox, notAvailable, notYet } from "./ui/messageBox.js";
@@ -54,22 +59,42 @@ const PANELS = {
 const store = createStore();
 const engine = createEngine();
 
-/** Send a command, publish the new state, and show a dialog if it failed. */
+// Engine events that come with a message box: [title, icon].
+// TODO(R-9): the original's exact titles and wording.
+const NOTICES = {
+  halt: ["CPU runtime", "info"],
+  end: ["CPU runtime", "info"],
+  breakpoint: ["CPU Simulator", "info"],
+  watch: ["CPU Simulator", "info"],
+};
+
+/** Send a command, publish the new state, show output and any dialog. */
 async function send(cmd, args) {
   const reply = store.applyReply(await engine.call(cmd, args));
+  for (const e of reply.events) if (e.type === "output") consoleWrite(e.text);
   if (!reply.ok) {
     const event = reply.events[0] ?? { message: "Unknown error" };
     await messageBox("CPU Simulator", event.message, { icon: "error" });
+  }
+  for (const e of reply.events) {
+    if (NOTICES[e.type]) await messageBox(NOTICES[e.type][0], e.message, { icon: NOTICES[e.type][1] });
   }
   return reply;
 }
 
 const ui = { stepMode: "instruction", speed: 1 };
 const ctx = { store, engine, send, ui, notAvailable, notYet, isa: [] };
+ctx.runner = createRunner(ctx);
 
 // Developer handle for the browser console, e.g.
 //   await yasmax.send("add_instruction", { program: "P1", text: "MOV #5, R00" })
-window.yasmax = { send, store, engine };
+window.yasmax = { send, store, engine, runner: ctx.runner };
+
+// Never fail silently: show any script error, so a student can report it.
+window.addEventListener("error", (e) => messageBox("YASMAX error", String(e.message), { icon: "error" }));
+window.addEventListener("unhandledrejection", (e) =>
+  messageBox("YASMAX error", String(e.reason?.message ?? e.reason), { icon: "error" }),
+);
 
 fitToScreen(document.getElementById("stage"), { onResize: refillAll });
 for (const [id, panel] of Object.entries(PANELS)) {
@@ -84,7 +109,9 @@ engine.on("boot", (m) => {
 
 try {
   const info = await engine.ready;
-  ctx.isa = info.isa;
+  // Ask the engine directly if the worker did not send it (an old cached
+  // worker.js did not): without it the instruction dialog cannot work.
+  ctx.isa = info.isa ?? (await engine.call("isa")).result ?? [];
   store.set(info.snapshot);
   overlay.hidden = true;
   console.info(`YASMAX ready: engine ${info.engineVersion}, Pyodide ${info.pyodideVersion}`);

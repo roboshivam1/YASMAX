@@ -4,15 +4,15 @@
  * The "Apply label" prompt opened by NEW LABEL... in the instruction dialog:
  * "Enter the name of the label", a text box, OK and Cancel.
  *
- * TODO(research): how YASMIN 7.5.50 shows labels in the instruction list
- * and how jumps refer to them. Until that is known, OK reports that labels
- * are not built yet instead of guessing.
+ * OK calls onName(name); the instruction dialog adds the label there.
+ * YASMIN 7.5.50 shows a label as a "Name:" row with T = -1 and the address
+ * of the next instruction. TODO(research): how a jump refers to a label.
  */
 
 import { button } from "../ui/widgets.js";
 import { openWindow } from "../ui/window.js";
 
-export function openLabelDialog(ctx) {
+export function openLabelDialog(onName) {
   const html =
     '<span class="w-label" style="left:10px;top:12px">Enter the name of the label</span>' +
     button("OK", { id: "lbl-ok" }).replace("<button", '<button style="left:320px;top:8px;width:78px;height:26px"') +
@@ -25,7 +25,7 @@ export function openLabelDialog(ctx) {
   async function ok() {
     const name = input.value.trim();
     win.close();
-    if (name) await ctx.notYet(`Labels ("${name}")`);
+    if (name) await onName(name);
   }
   win.body.querySelector("#lbl-ok").addEventListener("click", ok);
   win.body.querySelector("#lbl-cancel").addEventListener("click", () => win.close());
